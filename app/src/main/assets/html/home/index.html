@@ -1,0 +1,600 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+   <!-- <script src="https://unpkg.com/masonry-layout@4/dist/masonry.pkgd.min.js"></script>  -->
+   <script src="../vue.min.js"></script>
+	<style>
+*{-webkit-tap-highlight-color:rgba(0,0,0,0);outline:none;}
+[v-cloak] {
+    display: none;
+}
+html,body{
+    width:100vw;
+	height:100vh;
+	margin:0 auto;
+}
+::-webkit-scrollbar {display:none}
+
+canvas {
+    display: block;
+	height: 100vh;
+    width: 100vw;
+	filter:blur(60px);
+	z-index:-1;
+	position:fixed;
+}
+p , span {word-break:break-all;}
+.container{
+    overflow: scroll;
+    height: 100%;
+    width: 100%;
+}
+
+h2{
+padding:0;
+margin:0;
+}
+
+.uk-card {
+	border-top: 2px solid;
+	position: relative;
+	box-sizing: border-box;
+	transition: box-shadow 0.15s ease-out;
+	border-radius: 3px;
+	background: #ffffffb5;
+	color: #666;
+	box-shadow: 0px 5px 15px rgba(0,0,0,0.08);
+	margin-bottom:20px;
+}
+.uk-card img{
+display: block;
+height: 100%;
+width: 100%;
+object-fit: contain;
+}
+.uk-card-header {
+	padding: 0.55rem 1rem;
+}
+.uk-grid {
+	display: flex;
+	flex-wrap: wrap;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+	margin-left: -15px;
+	padding-left: 15px;
+}
+.uk-width-expand {
+	flex: 1;
+	min-width: 1px;
+}
+img:after{
+ content:"";
+}
+.tab-item{
+height:100%;
+width:20%;
+text-align:center;
+font-size:10px;
+}
+.tab-frame{
+margin:5px;
+padding: 0px;
+text-align: center;
+vertical-align:middle;
+height: calc( 100% - 10px );
+
+}
+.tab-frame > img{
+    width: 35px;
+    padding: 5px;
+display: block;
+margin:0 auto;
+}
+.tab-frame > span{
+font-size:10px;
+line-height:10px;
+}
+.changecolor {
+border-radius: 5%;
+background: #47a3da;
+-webkit-animation-duration: 5000ms;
+            -webkit-animation-iteration-count: infinite;
+            -webkit-animation-timing-function: linear;
+ -webkit-animation-name:'GrowQuare';
+
+}
+@-webkit-keyframes GrowQuare {
+            50%{
+               background: #99CC00;
+			   border-radius: 20%;
+            }
+ }
+#app{
+height:100vh;
+padding-left:20px;
+padding-right:20px;
+}
+.app-nopadding{
+padding-left:0px !important;
+padding-right:0px !important;
+}
+.myGroup-enter, .myGroup-leave-to{
+            opacity: 0;
+            transform: translateY(80px);
+        }
+.myGroup-enter-active, .myGroup-leave-active {
+            transition: all 0.5s;
+        }
+
+        /* v-move和v-leave-active实现删除一行，后面元素移位的动画效果 */
+.myGroup-move{
+            transition: all 0.5s;
+        }
+.myGroup-leave-active{
+            position: absolute;
+        }
+.fade-enter-active, .fade-leave-active {
+  transition: opacity .5s;
+}
+.fade-enter, .fade-leave-to {
+  opacity: 0;
+}
+
+
+
+#search {
+	width: 100%;
+	height: 40px;
+	display: flex;
+	background-color: rgba(0, 0, 0, 0.05);
+	border-radius: 2px;
+
+}
+#search input{
+	flex: 1;
+	height: 100%;
+	border: none;
+	padding: 0 16px;
+	font-size: 13px;
+	background: none;
+}
+#search button{
+	padding: 0 32px;
+	height: 100%;
+	font-size: 22px;
+	color: #fff;
+	background: #474747;
+	border: none;
+	cursor: pointer;
+}
+#toolbar{
+border-radius: 10px;
+box-shadow: 0px 2px 10px 0px #333;
+    position: fixed;
+    width: 94vw;
+    height: 70px;
+    bottom: 10px;
+    left: 3vw;
+	background:rgba(255, 255, 255, 0.7);
+    backdrop-filter:blur(5px);
+	z-index:999;white-space: nowrap;
+	display: flex;font-size:0;
+	transition: transform .5s;
+}
+.toolbar-hidden{
+ transform: translateY(80px);
+}
+.search-text{
+color:red;
+background:yellow;
+}
+.wode-item{
+height:3rem;border:1px solid gray;
+padding: 0 10px 0 10px;
+display: flex;
+align-items: center;
+margin-bottom:10px;
+}
+.wode-item > img{
+height:60%;
+}
+.wode-item >span{
+line-height:3rem;
+font-size:1.2rem;
+margin-left:10px;
+}
+</style>
+  
+</head>
+<body>
+
+
+<!-- <canvas id="canvas"></canvas> -->
+
+<div id="toolbar">
+
+<div class="tab-item">
+<div class="tab-frame" onclick="select(1)">
+<img src="notebook.svg"/>
+<span>新闻</span>
+</div>
+</div>			
+			
+<div class="tab-item">
+<div class="tab-frame" onclick="select(2)">
+<img src="search.svg"/>
+<span>搜索</span>
+</div>
+</div>
+
+<div class="tab-item">
+<div class="tab-frame changecolor" onclick="JS.startcapture()">
+<img style="width:45px;padding:0" src="camera.svg"/>
+<span>录制</span>
+</div>
+</div>
+
+<div class="tab-item">
+<div class="tab-frame" onclick="select(3)">
+<img src="web.svg"/>
+<span>工具箱</span>
+</div>
+</div>
+
+<div class="tab-item">
+<div class="tab-frame" onclick="select(4)">
+<img src="person.svg"/>
+<span>我的</span>
+</div>
+</div>			
+			
+</div>
+
+
+<div id="app" v-cloak>
+
+    <div class="container">
+
+
+<div v-show="tabselect==3">	
+
+	  <br>
+	  <h2>
+        工具箱
+      </h2>
+	  <br>
+
+<div id="notice" style="display:none;height: 80vh;width: calc( 100vw - 40px );justify-content: center;align-items: center;">
+<img src="empty.png" style="height:40vw;"/>
+</div>
+	  
+<transition-group appear name="myGroup" tag="div">
+
+
+						 <div v-for="item in notebook" @click="JS.view(item.id)" :key="item.id" class="uk-card">
+							<div class="uk-card-header">
+								<div class="uk-grid">
+									<div class="uk-width-expand">
+										<span>{{ item.name }}</span>
+									</div>
+                                   <time>{{ item.time_start }}</time>
+								</div>
+							</div>
+							
+								<img v-bind:src="get_notePreview(item.id)">
+						
+                             <!--  {{ get_notePreview(item.id) }}  -->
+                            </div>
+						
+
+</transition-group>
+
+	  <p id="notelist"></p>
+	 <!-- <div style="margin-bottom:30px;font-size:15px">到底了</div>    -->
+</div>  
+
+
+
+	
+<div v-show="tabselect==2">
+      <br>
+	  <h2>搜索</h2>
+	  <br>
+<div id="search">
+<input v-model="searchfield" type="text"  placeholder="在这里键入关键词"> 
+<button @click="search()">
+<img src="search.svg" height="60%" style="display: block;" />
+</button>
+</input>
+</div>
+<br>
+
+<transition-group appear name="myGroup" tag="div">
+
+
+						 <div v-for="item in searchresult" @click="JS.view(item.origin,item.id)" :key="item.id" class="uk-card">
+							<div class="uk-card-header">
+								<div class="uk-grid">
+									<div class="uk-width-expand">
+										<span>{{ item.name }}</span>
+									</div>
+                                   <time>{{ datestr(item.time) }}</time>
+								</div>
+							</div>
+							
+								<img v-if="item.type=='ppt'" v-bind:src="item.path">
+								<span v-html="search_highlight(item.text)"></span>
+						
+                             <!--  {{ get_notePreview(item.id) }}  -->
+                            </div>
+						
+
+</transition-group>
+
+<p id="searchlist"></p>
+
+
+
+</div> 
+
+
+
+<div v-show="tabselect==1">
+<transition name="fade">
+<div v-show="iframeloading" style="display:flex;height: 100vh;width: 100vw;justify-content: center;align-items: center;">
+<img src="loading.svg" style="width:30vw;"/>
+</div>
+</transition>
+<iframe v-show="!iframeloading" id="myiframe" src="https://idealdoc.idealbroker.cn" frameborder="0" style="height:100vh;width:100vw"></iframe>
+</div>
+
+
+
+
+<div v-show="tabselect==4">
+      <br>
+	  <h2>我的</h2>
+	  <br>
+	  <br>
+
+	  <div v-if="!loginState.logedin" onclick="JS.qqlogin()" style="text-align:center;width: 25vw;margin: 0 auto;">
+	  <img style="width:100%" src="person.svg"></img>
+	  <span style="display: block;">未登录</span>
+	  </div>
+	  
+	  <div v-else onclick="JS.logout()" style="text-align:center;width: 25vw;margin: 0 auto;">
+	  <img style="width:100%;border-radius:10%"  v-bind:src="'https://idealbroker.cn/getavatar?token='+JS.get_token()"></img>
+	  <span style="display: block;">{{loginState.nickname}}</span>
+	  </div>
+	  <br><br>
+	  
+	  
+	  
+
+	  <!--
+	  <div class="wode-item">
+	    <img src="personal.svg"/>
+		<span>个人中心</span>
+		<img style="margin-left:auto;" src="arrow.svg"/>
+	  </div>
+	  -->
+	  <div onclick="JS.settings()" class="wode-item">
+	    <img src="settings.svg"/>
+		<span>设置</span>
+		<img style="margin-left:auto;" src="arrow.svg"/>
+	  </div>
+	  <div onclick="JS.aboutus()" class="wode-item">
+	    <img src="about.svg"/>
+		<span>关于我们</span>
+		<img style="margin-left:auto;" src="arrow.svg"/>
+	  </div>
+	  
+	  
+	  
+</div> 
+
+ 
+
+
+	  
+    </div>
+
+
+</div>
+
+  <script>
+
+var app = new Vue({
+  el: '#app',
+  data: {
+    //notebook: [{"name":1,"time_start":1,"id":1}]
+	 notebook: [],
+	 tabselect:1,
+	 searchfield:'',
+	 searchresult:[],
+	 loginState:{},
+	 iframeloading:true,
+  },
+  watch:{
+        notebook:function(val, oldval) {
+              if(val.length==0){
+              document.getElementById("notice").style.display="flex";
+              }
+			  else{
+			  document.getElementById("notice").style.display="none";
+			  }
+        },
+		tabselect:function(val, oldval) {
+            if(val==1){
+				addClass(document.querySelector('#app'),"app-nopadding");
+				app.refreshcourselib();
+				}
+			else{
+				removeClass(document.querySelector('#app'),"app-nopadding")
+				}
+			 
+        },
+  },
+  methods:{
+  refreshcourselib:function(){
+  this.iframeloading=true;
+  document.getElementById("myiframe").src=" "+document.getElementById("myiframe").src;
+  },
+  get_notePreview:function(origin){
+    return JS.get_notePreview(origin)+"#"+origin;
+     },
+  search:function(){
+     //document.getElementById('searchlist').innerHTML=JS.search(this.searchfield);
+	 if(this.searchfield.length==0){JS.alert("输入不能为空!");return;}
+	 this.searchresult=eval(JS.search(this.searchfield));
+     },
+  datestr:function(date) {
+  var date = new Date(date);
+  var YY = date.getFullYear() + '-';
+  var MM = (date.getMonth() + 1 < 10 ? '0' + (date.getMonth() + 1) : date.getMonth() + 1) + '-';
+  var DD = (date.getDate() < 10 ? '0' + (date.getDate()) : date.getDate());
+  var hh = (date.getHours() < 10 ? '0' + date.getHours() : date.getHours()) + ':';
+  var mm = (date.getMinutes() < 10 ? '0' + date.getMinutes() : date.getMinutes()) + ':';
+  var ss = (date.getSeconds() < 10 ? '0' + date.getSeconds() : date.getSeconds());
+  return YY + MM + DD +" "+hh + mm + ss;
+     },
+	search_highlight:function(t){
+	return t.replace(this.searchfield,'<span class="search-text">' + this.searchfield + '</span>');
+	}
+  },
+  mounted() {
+  //document.getElementById('notelist').innerHTML=JS.get_notelist();
+  //this.notebook=eval(JS.get_notelist());
+  addClass(document.querySelector('#app'),"app-nopadding");
+  this.loginState=eval('(' + JS.get_loginState() + ')');
+  }
+});
+
+
+function hasClass(obj, cls) {  
+    return obj.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));  
+}  
+  
+function addClass(obj, cls) {  
+    if (!this.hasClass(obj, cls)) obj.className += " " + cls;  
+}  
+  
+function removeClass(obj, cls) {  
+    if (hasClass(obj, cls)) {  
+        var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');  
+        obj.className = obj.className.replace(reg, ' ');  
+    }  
+}  
+  
+function toggleClass(obj,cls){  
+    if(hasClass(obj,cls)){  
+        removeClass(obj, cls);  
+    }else{  
+        addClass(obj, cls);  
+    }  
+}
+function select(i){
+app.tabselect=i;
+}
+
+
+var lastScrollTop = 0;
+var ele=document.querySelector('.container');
+ele.addEventListener("scroll", function(){ 
+   var st = ele.scrollTop;
+   if (st < lastScrollTop){
+      removeClass(document.querySelector('#toolbar'),"toolbar-hidden")
+   } else {
+      addClass(document.querySelector('#toolbar'),"toolbar-hidden")
+   }
+   lastScrollTop = st; 
+}, false);
+function postchild(msg){document.getElementById('myiframe')
+         .contentWindow.postMessage(msg,'*');}
+window.addEventListener('message', function(e){
+   console.log(e);  
+   switch(e.data){
+     case 'homepageloaded':app.iframeloading=false;break;
+     case 'toolbar-hide':addClass(document.querySelector('#toolbar'),"toolbar-hidden"); break;
+     case 'toolbar-show':removeClass(document.querySelector('#toolbar'),"toolbar-hidden"); break;
+            }  
+}, false);
+ </script>
+<!--
+ <script>
+ var speed=6;
+ var count=10;
+ window.onload = function () {
+  
+        const canvas = document.querySelector('canvas');
+        if (typeof canvas.getContext === 'undefined') {
+            return;
+        }
+        const ctx = canvas.getContext("2d");
+
+        function fitCanvasSize() {
+
+            canvas.width = document.documentElement.clientWidth;
+            canvas.height = document.documentElement.clientHeight;
+
+        }
+        fitCanvasSize();
+        window.onresize = fitCanvasSize;
+
+        var balls = [];
+
+        function rand(min, max) {
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        var Ball = function () {
+            this.r = rand(10, 30);
+            this.x = rand(0 + this.r, canvas.width - this.r);
+            this.y = rand(0 + this.r, canvas.height - this.r);
+            this.vx = rand(-speed, speed);
+            this.vy = rand(-speed, speed);
+            this.draw = function () {
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+                ctx.fillStyle="yellow";
+                ctx.fill();
+            };
+            this.move = function () {
+                if (this.x + this.r > canvas.width || this.x - this.r < 0) {
+                    this.vx *= -1;
+                }
+                if (this.y + this.r > canvas.height || this.y - this.r < 0) {
+                    this.vy *= -1;
+                }
+                this.x += this.vx;
+                this.y += this.vy;
+            }
+        };
+
+        function density() {
+            var i;
+            for (i = 0; i < count; i++) {
+                balls.push(new Ball);
+            }
+        };
+        density();
+
+        function update() {
+            var i;
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (i = 0; i < count; i++) {
+                balls[i].draw();
+                balls[i].move();
+            }
+            setTimeout(function () {
+                update();
+            }, 100)
+        };
+        update();
+    }
+</script>
+-->
+</body>
+</html>

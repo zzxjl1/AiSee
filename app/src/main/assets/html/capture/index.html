@@ -1,0 +1,492 @@
+<!doctype html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0,viewport-fit=cover,minimal-ui" />
+  <style>
+html,body{
+height:200vh;
+overflow:hidden;
+width:100vw;
+margin:0;
+background: #f4f4f4;
+text-rendering: optimizeSpeed;
+}
+::-webkit-scrollbar {display:none}
+
+@keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.4; }
+    to { opacity: 1.0; }
+}
+ 
+@-webkit-keyframes fade {
+    from { opacity: 1.0; }
+    50% { opacity: 0.4; }
+    to { opacity: 1.0; }
+}
+ 
+.blink {
+    animation:fade 3000ms infinite;
+    -webkit-animation:fade 3000ms infinite;
+}
+#view{
+overflow-x:scroll;
+overflow-y:hidden;
+position:absolute;
+top:0;
+left:0;
+width:100vw;
+height:100vh;
+white-space: nowrap;
+}
+#settings{
+    top: 0;
+    width: 100vw;
+    height: 100vh;
+    POSITION: ABSOLUTE;
+	z-index:99;
+	backdrop-filter: blur(10px);
+	opacity:0;
+	transition:all 0.5s ease-out;
+	pointer-events:none;
+	display: flex;
+    ALIGN-ITEMS: center;
+	justify-content:center;
+	background-color:#80808040;
+}
+ .card{
+box-shadow: 0px 5px 5px -3px rgba(0, 0, 0, 0.2), 0px 8px 10px 1px rgba(0, 0, 0, 0.14), 0px 3px 14px 2px rgba(0, 0, 0, 0.12);
+    height: 95vh;
+    transform: translateY(-50%);
+    background-color: #fff;
+    display: inline-block;
+    vertical-align: top;
+    top: 50%;
+    margin: 2px;
+    position: relative;
+	transition:background-color 1s;
+ }
+
+ .index{
+    float:left;
+    background-color: #ffeb3b;
+    border-radius: 16px;
+    align-items: center;
+    line-height: 20px;
+	overflow: hidden;
+    padding: 0 12px;
+	font-size: 13px;
+	margin:5px;
+ }
+.time{
+float:right;
+line-height: 20px;
+padding: 0 1px;
+font-size: 13px;
+margin:5px;
+}
+img{
+ display:block;
+  height:100%;
+}
+.timelinetext{
+font-size:0.2rem;
+}
+ .speech{
+ min-width:20vw;
+ max-width:30vw;
+ }
+ .point .index{
+ background-color:#FE5757;
+ }
+  .speech .index{
+ background-color:#2196F3;
+ }
+   .blackboard .index{
+ background-color:#9c27b0;
+ }
+ .speech-text{
+  display:block;
+  padding:10px;
+ }
+ .point{
+  min-width:20vw;
+ max-width:30vw;
+ }
+ .top-bar{
+ border-top: 2px solid #1ee325;
+ }
+ .top-bar::after{content:"";display:block;clear:both;}
+.speech-text::after{content:"";display:block;clear:both;}
+
+
+
+.text{
+word-break:normal; 
+    width:auto; 
+    display:block; 
+    white-space:pre-wrap;
+    word-wrap : break-word ;
+    overflow: hidden ;
+margin:10px;
+}
+#transcriber{
+position:fixed;
+left:0;
+bottom:0;
+background-image: linear-gradient(to right, rgb(0, 76, 255), rgb(82, 134, 255));
+box-shadow: 0px 3px 12px -2px rgba(95,95,95,0.2), 
+            0px 2px 12px 0px rgba(117,117,117,0.14),
+		    0px 1px 15px 0px rgba(121,121,121,0.12);
+font-size: 20px;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+	max-width: 40vw;
+	transition:all 0.5s;
+	overflow: hidden; text-overflow:ellipsis;white-space:nowrap;
+    opacity:0
+}
+#tools{
+position:fixed;
+right:0;
+bottom:0;
+background-image: linear-gradient(to right, rgb(254,87,87), rgb(254,137,137));
+box-shadow: 0px 3px 12px -2px rgba(95,95,95,0.2), 
+            0px 2px 12px 0px rgba(117,117,117,0.14),
+		    0px 1px 15px 0px rgba(121,121,121,0.12);
+    font-size: 20px;
+    padding: 10px;
+    margin: 10px;
+    border-radius: 10px;
+
+}
+#img{
+    height: calc(95vh - 32px );
+}
+.layer{
+    POSITION: ABSOLUTE;
+    height: 100%;
+    width: 100%;
+    TOP: 0;
+	opacity:0;
+	white-space: normal;
+    transition: opacity 0.5s;
+    display: flex;
+	align-items: center;
+	justify-content: center; 
+	text-align:center;
+}
+
+.layer:hover{
+    opacity:1;
+	backdrop-filter: blur(10px);
+}
+
+.layer_inner{visibility: hidden;transition-delay: 0.1s;}
+.layer:hover > .layer_inner{visibility: visible;}
+
+button {
+box-sizing: border-box;
+border: 0;
+margin:5px;
+text-decoration: none;
+cursor: pointer;
+text-align: center;
+padding: 12px 16px;
+border-radius: 6px;
+background-color: #fee06a;
+border: 2px black solid; 
+box-shadow: 1px 1px 3px -1px rgba(0,0,0,.13);
+color: #202020;
+font-size: 13px;
+font-weight: 600;
+letter-spacing: 0;
+}
+.highlight{
+background-color: #fee06a;
+}
+#settings img{
+height:10vh;
+margin:0 auto;
+}
+.settings-button{
+height:20vh;
+width:20vh;
+border: 2px black solid; 
+border-radius:20vh;
+display: flex;
+ALIGN-ITEMS: center;
+}
+.button-text{
+text-align:center;
+display: block;
+}
+.settings-option{
+margin:20px;
+}
+.on div{
+background:white;
+}
+  </style>
+</head>
+<body onload="load()">
+
+<div id="notice" style="height: 100vh;width: 100vw;display: flex;justify-content: center;align-items: center;">
+<img src="notice.png" style="height: 70vh;"/>
+</div>
+
+<div id="view">
+
+</div>
+<div id="settings" onclick="back()">
+
+<div  onclick="JS.set_speed()" class="settings-option">
+<div class="settings-button">
+<img src="icons/speed.svg"/>
+</div>
+<span class="button-text">捕获速度</span>
+</div>
+
+<div onclick="toggleFloatWindow(this)" class="settings-option on">
+<div class="settings-button">
+<img src="icons/window.svg"/>
+</div>
+<span class="button-text">悬浮窗</span>
+</div>
+
+<div  onclick="JS.pause()" class="settings-option">
+<div class="settings-button">
+<img src="icons/pause.svg"/>
+</div>
+<span class="button-text">暂停</span>
+</div>
+
+</div>
+
+<span id="transcriber">测试</span>
+<div id="tools" class="blink" onclick="opensettings()"><img src="icons/rec.svg" style="width:5vw"/></div>
+
+
+
+<template id="ppttemplate">
+<div id="index" class="card">
+<div class="top-bar">
+<span class="index">PPT</span>
+<span class="time">1分钟前</span>
+</div>
+<img id="img" src="" />
+<div class="layer"> 
+<div class="layer_inner">
+<button onclick="ocr(this)">查看文本</button><br>
+<button onclick="sidenote(this)">批注</button><br>
+<button onclick="togglefav(this)">划重点</button><br>
+<button onclick="del(this)">删除</button><br>
+</div>
+</div>
+</div>
+</template>
+
+<template id="speechtemplate">
+<div id="index" class="card speech">
+<div class="top-bar">
+<span class="index">语音</span>
+<span class="time">1分钟前</span>
+</div>
+<span class="text">111111</span>
+<div class="layer"> 
+<div class="layer_inner">
+<button onclick="play(this)">播放</button><br>
+<button onclick="sidenote(this)">批注</button><br>
+<button onclick="togglefav(this)">划重点</button><br>
+<button onclick="del(this)">删除</button><br>
+</div>
+</div>
+</div>
+</template>
+
+<template id="pointtemplate">
+<div id="index" class="card point">
+<div class="top-bar">
+<span class="index">知识点</span>
+<span class="time">1分钟前</span>
+</div>
+<span class="text">111111</span>
+<div class="layer">   </div>
+</div>
+</template>
+
+<template id="blackboardtemplate">
+<div id="index" class="card blackboard">
+<div class="top-bar">
+<span class="index">板书</span>
+<span class="time">1分钟前</span>
+</div>
+<img id="img" src=""/>
+<div class="layer">   </div>
+</div>
+</template>
+
+
+  <script>
+function load(){
+//debug();
+}
+function toggleFloatWindow(e){
+   if(hasClass(e,"on")){  
+        removeClass(e,"on"); 
+        JS.closeFloatWindow();		
+    }else{  
+        addClass(e,"on");
+		JS.openFloatWindow();	
+    }  
+}
+function sidenote(e){
+ var parent=e.parentNode.parentNode.parentNode;
+ var id = parseInt(parent.id);
+ console.log(id);
+ JS.sidenote(id);
+}
+function ocr(e){
+ var parent=e.parentNode.parentNode.parentNode;
+ var id = parseInt(parent.id);
+ console.log(id);
+ JS.ocr_text(id);
+}
+function del(e){
+ var parent=e.parentNode.parentNode.parentNode;
+ var id = parseInt(parent.id);
+ console.log(id);
+ parent.parentNode.removeChild(parent);
+ JS.del(id);
+ count--;
+if(count==0)document.getElementById("notice").style.display="flex";
+}
+function play(e){
+ var parent=e.parentNode.parentNode.parentNode;
+ var id = parseInt(parent.id);
+ start=parseInt(parent.getAttribute("start"));
+ end=parseInt(parent.getAttribute("end"));
+ console.log(start,end);
+ JS.play_segment(start,end,false);
+}
+function togglefav(e){
+ var parent=e.parentNode.parentNode.parentNode;
+ var id = parseInt(parent.id);
+ console.log(id);
+     if(hasClass(parent,"highlight")){  
+        removeClass(parent,"highlight"); 
+        JS.set_fav(id,false);		
+    }else{  
+        addClass(parent,"highlight");  
+		JS.set_fav(id,true);
+    }  
+}
+count=0;
+function render(t,index){
+count++;
+document.getElementById("notice").style.display="none";
+temp = t.querySelector('#index');
+temp.id=index;
+var clone = document.importNode(t, true);
+view.appendChild(clone);
+temp.id="index";
+scroll();
+}
+function scroll(){
+//view.scrollLeft = view.scrollWidth;
+setTimeout(function(){
+view.scroll({ left: view.scrollWidth, behavior: 'smooth' });
+},100);
+}
+var view = document.getElementById('view');
+function addspeech(index,str,start,end){
+var temp=document.getElementById('speechtemplate').content;
+temp.querySelector('.card').setAttribute("start",start);
+temp.querySelector('.card').setAttribute("end",end);
+temp.querySelector('.text').textContent = str;
+temp.querySelector('.time').textContent = time();
+render(temp,index);
+
+}
+function addpoint(index){
+var temp=document.getElementById('pointtemplate').content;
+temp.querySelector('.text').textContent = "慕课网mooc";
+temp.querySelector('.time').textContent = time();
+render(temp,index);
+}
+function addppt(index,path){
+var temp=document.getElementById('ppttemplate').content;
+//temp.querySelector('#img').src = "data:image/jpg;base64,"+base64;
+temp.querySelector('#img').src = path;
+temp.querySelector('.time').textContent = time();
+render(temp,index);
+}
+function addblackboard(index){
+var temp=document.getElementById('blackboardtemplate').content;
+temp.querySelector('#img').src = "1.jpg";
+temp.querySelector('.time').textContent = time();
+render(temp,index);
+}
+
+var TranscriberTimer;
+function setTranscriber(str){
+document.getElementById('transcriber').innerHTML=str;
+document.getElementById('transcriber').style.opacity=1;
+clearTimeout(TranscriberTimer);
+TranscriberTimer = setTimeout(function(){
+document.getElementById('transcriber').style.opacity=0;
+},500);
+}
+
+
+
+function debug(){
+addblackboard(1);
+addpoint(2);
+addppt(3);
+addspeech(4);
+}
+function opensettings(){
+document.getElementById("settings").style.pointerEvents = "auto";
+document.getElementById('settings').style.opacity=1;
+}
+function back(){
+document.getElementById("settings").style.pointerEvents = "none";
+document.getElementById('settings').style.opacity=0;
+}
+function hasClass(obj, cls) {  
+    return obj.className.match(new RegExp('(\\s|^)' + cls + '(\\s|$)'));  
+}  
+  
+function addClass(obj, cls) {  
+    if (!this.hasClass(obj, cls)) obj.className += " " + cls;  
+}  
+  
+function removeClass(obj, cls) {  
+    if (hasClass(obj, cls)) {  
+        var reg = new RegExp('(\\s|^)' + cls + '(\\s|$)');  
+        obj.className = obj.className.replace(reg, ' ');  
+    }  
+}  
+  
+function toggleClass(obj,cls){  
+    if(hasClass(obj,cls)){  
+        removeClass(obj, cls);  
+    }else{  
+        addClass(obj, cls);  
+    }  
+}
+function time(){
+date = new Date(),//时间戳为10位需*1000，时间戳为13位的话不需乘1000
+      //  Y = date.getFullYear() + '',
+      //  M = (date.getMonth()+1 < 10 ? '0'+(date.getMonth()+1) : date.getMonth()+1),
+      //  D = (date.getDate() < 10 ? '0'+(date.getDate()) : date.getDate()),
+        h = (date.getHours() < 10 ? '0'+(date.getHours()) : date.getHours())+":",
+        m = (date.getMinutes() < 10 ? '0'+(date.getMinutes()) : date.getMinutes())+":",
+        s = (date.getSeconds() < 10 ? '0'+(date.getSeconds()) : date.getSeconds());
+return h+m+s;
+}  
+  </script>
+</body>
+</html>
