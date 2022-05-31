@@ -41,7 +41,7 @@ dependencies {
 
     implementation 'com.google.code.gson:gson:+'
     implementation 'com.squareup.okhttp3:okhttp:4.8.0'
-    implementation files('libs/ai_audio.aar')
+    //implementation files('libs/ai_audio.aar')
     //implementation 'com.yanzhenjie:permission:2.0.3'
     implementation 'com.github.getActivity:XXPermissions:13.6'
     implementation 'com.kongzue.baseokhttp_v3:baseokhttp_v3:3.1.6'

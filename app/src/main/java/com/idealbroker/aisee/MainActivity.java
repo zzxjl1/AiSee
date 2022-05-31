@@ -52,6 +52,8 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setDomStorageEnabled(true);
         webSettings.setAppCacheEnabled(true);
+        webSettings.setAllowUniversalAccessFromFileURLs(true);
+        webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         webSettings.setAppCachePath(getApplication().getCacheDir().getAbsolutePath());
         webSettings.setDatabaseEnabled(true);
         webSettings.setUserAgentString(webSettings.getUserAgentString() + " TooMuchAI/" + ToolUtils.getLocalVersion(getApplicationContext()));
@@ -72,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
             }
 
         }, "JS");
-        webView.loadUrl("file:///android_asset/html/home/index.html");
+        webView.loadUrl("file:///android_asset/html/index.html");
         webView.setWebContentsDebuggingEnabled(true);
 
 
@@ -108,7 +110,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void run() {
                 ToolUtils.syncCookie(webView);
-                webView.evaluateJavascript("javascript:app.loginState=eval('(' + JS.get_loginState() + ')');postchild('refreshLoginState')", new ValueCallback<String>() {
+                webView.evaluateJavascript(ToolUtils.genVuexStoreActionStr("update_loginState"), new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
 
