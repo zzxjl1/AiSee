@@ -32,6 +32,7 @@ import java.util.zip.ZipOutputStream;
 public class ToolUtils {
 
 
+
     public static File moveFile(File file, File dir) throws IOException {
         File newFile = new File(dir, file.getName());
         FileChannel outputChannel = null;
@@ -288,7 +289,7 @@ public class ToolUtils {
     }
 
     public static String genVuexStoreActionStr(String t){
-       return String.format("javascript:document.getElementById(\"app\").__vue_app__.config.globalProperties.$store.dispatch(%s)",t);
+       return String.format("javascript:document.getElementById(\"app\").__vue_app__.config.globalProperties.$store.dispatch('%s')",t);
     }
 
 

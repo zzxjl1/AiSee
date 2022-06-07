@@ -1,0 +1,92 @@
+<PreferenceScreen xmlns:app="http://schemas.android.com/apk/res-auto">
+
+   <!-- <PreferenceCategory app:title="@string/messages_header">
+
+        <EditTextPreference
+            app:key="signature"
+            app:title="@string/signature_title"
+            app:useSimpleSummaryProvider="true" />
+
+        <ListPreference
+            app:defaultValue="reply"
+            app:entries="@array/reply_entries"
+            app:entryValues="@array/reply_values"
+            app:key="reply"
+            app:title="@string/reply_title"
+            app:useSimpleSummaryProvider="true" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory app:title="@string/sync_header">
+
+        <SwitchPreferenceCompat
+            app:key="sync"
+            app:title="@string/sync_title" />
+
+        <SwitchPreferenceCompat
+            app:dependency="sync"
+            app:key="attachment"
+            app:summaryOff="@string/attachment_summary_off"
+            app:summaryOn="@string/attachment_summary_on"
+            app:title="@string/attachment_title" />
+
+    </PreferenceCategory>
+-->
+    <PreferenceCategory
+        app:iconSpaceReserved="false"
+        app:title="@string/capture_header">
+
+        <SwitchPreferenceCompat
+            app:defaultValue="true"
+            app:iconSpaceReserved="false"
+            app:key="capture_compatible_mode"
+            app:summary="@string/capture_compatible_mode_summary"
+            app:title="@string/capture_compatible_mode_title" />
+
+    </PreferenceCategory>
+
+    <PreferenceCategory
+        app:allowDividerAbove="false"
+        app:iconSpaceReserved="false"
+        app:title="@string/debug_header">
+
+        <Preference
+            app:key="pref_soc_temp"
+            app:persistent="false"
+            app:selectable="false"
+            app:summary="获取中"
+            app:title="SOC TEMP"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="pref_system_release"
+            app:persistent="false"
+            app:selectable="false"
+            app:title="SYSTEM RELEASE"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="pref_device_brand"
+            app:persistent="false"
+            app:selectable="false"
+            app:title="DEVICE BRAND"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="pref_device_model"
+            app:persistent="false"
+            app:selectable="false"
+            app:title="DEVICE MODEL"
+            app:iconSpaceReserved="false" />
+
+        <Preference
+            app:key="pref_app_version"
+            app:persistent="false"
+            app:selectable="false"
+            app:title="APP VERSION"
+            app:iconSpaceReserved="false"/>
+
+
+    </PreferenceCategory>
+
+</PreferenceScreen>

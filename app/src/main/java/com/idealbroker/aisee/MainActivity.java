@@ -17,8 +17,8 @@ import com.hjq.permissions.XXPermissions;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.Parameter;
-import com.kongzue.dialog.util.DialogSettings;
-import com.kongzue.dialog.v3.WaitDialog;
+
+import com.kongzue.dialogx.dialogs.WaitDialog;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -63,6 +63,7 @@ public class MainActivity extends AppCompatActivity {
             public void qqlogin() {
                 MyApplication.mTencent.login(MainActivity.this, "all", QQLoginListener);
             }
+
             @JavascriptInterface
             public String get_loginState() {
                 return MyApplication.user.getLoginState().toString();
@@ -71,6 +72,27 @@ public class MainActivity extends AppCompatActivity {
             @JavascriptInterface
             public String get_token() {
                 return MyApplication.user.getToken();
+            }
+
+            @JavascriptInterface
+            public void settings() {
+                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+                startActivity(intent);
+            }
+
+            @JavascriptInterface
+            public void toggle_micService() {
+                Intent intent = new Intent(MainActivity.this, MicService.class);
+                if (!MicService.isRunning()) {
+                    startService(intent);
+                } else {
+                    stopService(intent);
+                }
+            }
+
+            @JavascriptInterface
+            public boolean get_micServiceState(){
+                return MicService.isRunning();
             }
 
         }, "JS");
@@ -113,14 +135,23 @@ public class MainActivity extends AppCompatActivity {
                 webView.evaluateJavascript(ToolUtils.genVuexStoreActionStr("update_loginState"), new ValueCallback<String>() {
                     @Override
                     public void onReceiveValue(String value) {
-
                     }
                 });
             }
         });
-
     }
-
+    public static void refreshMicServiceState() {
+        MainActivity.base.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                webView.evaluateJavascript(ToolUtils.genVuexStoreActionStr("update_micServiceState"), new ValueCallback<String>() {
+                    @Override
+                    public void onReceiveValue(String value) {
+                    }
+                });
+            }
+        });
+    }
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -138,7 +169,7 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("QQLOGIN", jsonObject.toString());
                 String accessToken = jsonObject.getString("access_token");
 
-                HttpRequest.GET(MainActivity.this, "/qqlogin",
+                HttpRequest.GET(MainActivity.this, "/oauth/qq",
                         new Parameter().add("accessToken", accessToken), new ResponseListener() {
                             @Override
                             public void onResponse(String response, Exception error) {
