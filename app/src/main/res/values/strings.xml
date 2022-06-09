@@ -2,7 +2,7 @@
     <string name="app_name">AiSee</string>
     <string name="title_activity_settings">SettingsActivity</string>
 
- <!--   &lt;!&ndash; Preference Titles &ndash;&gt;
+    <!--   &lt;!&ndash; Preference Titles &ndash;&gt;
     <string name="messages_header">Messages</string>
     <string name="sync_header">Sync</string>
 
@@ -19,10 +19,19 @@
     -->
 
     <!-- Preference Titles -->
-    <string name="capture_header">图形视觉</string>
+    <string name="common">通用</string>
     <string name="debug_header">设备信息(debug)</string>
+    <string name="network">网络</string>
+    <string name="back_to_default">恢复默认</string>
+
     <string name="capture_compatible_mode_title">兼容模式</string>
+    <string name="http_base_url">HTTP请求地址</string>
+    <string name="http_base_url_default">https://aisee.idealbroker.cn</string>
+    <string name="ws_base_url">WebSocket请求地址</string>
+    <string name="ws_base_url_default">wss://aisee.idealbroker.cn</string>
     <!-- Preferences -->
-    <string name="capture_compatible_mode_summary">启用本项可以解决录制时闪退的问题，但会加大资源消耗</string>
+    <string name="capture_compatible_mode_summary">启用本项可以解决闪退的问题，但会加大资源消耗</string>
+    <string name="title_activity_settings2">SettingsActivity2</string>
+
 
 </resources>

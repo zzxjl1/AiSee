@@ -75,6 +75,7 @@ public class MicService extends Service {
 
     public static void stop() {
         running = false;
+        MyApplication.tts.speek("语音控制：关", true, true);
         mAudioRecord.stop();
         mAudioRecord.release();
         ws.close();
@@ -83,7 +84,7 @@ public class MicService extends Service {
 
     private static void create_ws_conn() {
         Log.e(TAG, "WS CONNECTING");
-        String url = String.format("ws://192.168.31.114:4000/stt");
+        String url = MyApplication.settings.getString("ws_base_url", MyApplication.context.getResources().getString(R.string.ws_base_url_default)) + "/stt";
         ws = new WebSocketClient(URI.create(url), new Draft_6455(new PerMessageDeflateExtension())) {
 
             @Override
@@ -92,7 +93,7 @@ public class MicService extends Service {
                 try {
                     JSONObject t = new JSONObject(message);
                     String text = t.getString("text");
-                    PopTip.show(R.mipmap.ai_apeech,text.length()<10?text:text.substring(text.length()-10)).setAutoTintIconInLightOrDarkMode(false);
+                    PopTip.show(R.mipmap.ai_apeech, text.length() < 10 ? text : text.substring(text.length() - 10)).setAutoTintIconInLightOrDarkMode(false);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -110,6 +111,8 @@ public class MicService extends Service {
                         mAudioRecord.startRecording();
 
                         running = true;
+                        MyApplication.tts.speek("语音控制：开", true, true);
+                        PopTip.show(R.mipmap.ai_apeech, "请对屏幕说出想访问的功能").setAutoTintIconInLightOrDarkMode(false);
                         refreshMicServiceState();
                         byte[] buffer = new byte[mBufferSizeInBytes];
                         Log.e(TAG, "开始发送数据");
@@ -153,14 +156,22 @@ public class MicService extends Service {
     }
 
     private static void showNetworkErrorDialog() {
-        new MessageDialog("语音控制出错", "网络连接异常，请检查你的网络", "重试")
+        MyApplication.tts.speek("语音控制出错", true, true);
+        new MessageDialog("语音控制出错", "网络连接异常，请检查你的网络，是否需要重试？", "重试", "取消")
                 .setOkButton(new OnDialogButtonClickListener<MessageDialog>() {
                     @Override
                     public boolean onClick(MessageDialog baseDialog, View v) {
                         start();
                         return false;
                     }
-                }).setCancelButton("取消").show();
+                })
+                .setCancelButton(new OnDialogButtonClickListener<MessageDialog>() {
+                    @Override
+                    public boolean onClick(MessageDialog baseDialog, View v) {
+                        MyApplication.tts.speek("取消", true, true);
+                        return false;
+                    }
+                }).show();
     }
 
 

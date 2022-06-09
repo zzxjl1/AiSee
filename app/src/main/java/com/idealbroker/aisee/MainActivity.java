@@ -1,6 +1,7 @@
 package com.idealbroker.aisee;
 
 import android.content.Intent;
+import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -8,6 +9,7 @@ import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -16,9 +18,13 @@ import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.ResponseListener;
+import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.Parameter;
 
+import com.kongzue.dialogx.dialogs.MessageDialog;
 import com.kongzue.dialogx.dialogs.WaitDialog;
+import com.kongzue.dialogx.interfaces.BaseDialog;
+import com.kongzue.dialogx.interfaces.OnDialogButtonClickListener;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
 import com.tencent.tauth.UiError;
@@ -60,7 +66,32 @@ public class MainActivity extends AppCompatActivity {
         webView.addJavascriptInterface(new Object() {
 
             @JavascriptInterface
+            public void logout() {
+                MyApplication.tts.speek("确定要退出登录吗?", true, true);
+                MessageDialog.build()
+                        .setTitle("确定要退出登录吗?")
+                        .setMessage(null)
+                        .setCancelButton("取消", new OnDialogButtonClickListener() {
+                            @Override
+                            public boolean onClick(BaseDialog baseDialog, View v) {
+                                MyApplication.tts.speek("取消", true, true);
+                                return false;
+                            }
+                        })
+                        .setOkButton("确定", new OnDialogButtonClickListener() {
+                            @Override
+                            public boolean onClick(BaseDialog baseDialog, View v) {
+                                MyApplication.tts.speek("退出登录成功", true, true);
+                                MyApplication.user.logout();
+                                return false;
+                            }
+                        })
+                        .show();
+            }
+
+            @JavascriptInterface
             public void qqlogin() {
+                MyApplication.tts.speek("开始QQ登录", true, true);
                 MyApplication.mTencent.login(MainActivity.this, "all", QQLoginListener);
             }
 
@@ -91,8 +122,24 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @JavascriptInterface
-            public boolean get_micServiceState(){
+            public boolean get_micServiceState() {
                 return MicService.isRunning();
+            }
+
+            @JavascriptInterface
+            public String get_httpBaseUrl() {
+                return BaseOkHttp.serviceUrl;
+            }
+
+            @JavascriptInterface
+            public void speek(String text, boolean preemptive, boolean flush_queue) {
+                MyApplication.tts.speek(text, preemptive, flush_queue);
+            }
+
+            @JavascriptInterface
+            public void camera(){
+                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+                startActivity(intent);
             }
 
         }, "JS");
@@ -140,6 +187,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     public static void refreshMicServiceState() {
         MainActivity.base.runOnUiThread(new Runnable() {
             @Override
@@ -152,6 +200,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
     }
+
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -175,9 +224,11 @@ public class MainActivity extends AppCompatActivity {
                             public void onResponse(String response, Exception error) {
                                 try {
                                     JSONObject jsonObject = new JSONObject(response);
-                                    MyApplication.user.set("token", jsonObject.getString("token"));
                                     ToolUtils.showToastMessage(MainActivity.this, jsonObject.getString("description"), 2000);
-                                    MyApplication.user.login();
+                                    if (jsonObject.getBoolean("success")) {
+                                        MyApplication.user.set("token", jsonObject.getString("token"));
+                                        MyApplication.user.login();
+                                    }
                                     WaitDialog.dismiss();
                                 } catch (Exception e) {
                                     e.printStackTrace();
@@ -201,7 +252,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public void onCancel() {
-            ToolUtils.showToastMessage(MainActivity.this, "取消", 1000);
+            ToolUtils.showToastMessage(MainActivity.this, "用户取消登录", 1000);
         }
 
         @Override
@@ -212,5 +263,29 @@ public class MainActivity extends AppCompatActivity {
 
     };
 
+    @Override
+    protected void onDestroy() {
+        if (webView != null) {
+            webView.destroy();
+            webView = null;
+        }
+        super.onDestroy();
+    }
+
+
+    long exitTime;
+
+    @Override
+    public void onBackPressed() {
+
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            ToolUtils.showToastMessage(MyApplication.context,"再按一次退出程序",2000);
+            exitTime = System.currentTimeMillis();
+        } else {
+            finish();
+        }
+
+
+    }
 
 }

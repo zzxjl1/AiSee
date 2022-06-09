@@ -51,4 +51,5 @@ dependencies {
     implementation 'org.java-websocket:Java-WebSocket:1.5.2'
     implementation "com.github.kongzue.DialogX:DialogX:0.0.45.beta12"
     implementation 'com.github.kongzue.DialogX:DialogXIOSStyle:0.0.45.beta12'
+    implementation 'com.quickbirdstudios:opencv:3.4.5'
 }

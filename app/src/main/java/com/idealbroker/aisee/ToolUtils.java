@@ -6,12 +6,16 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.Matrix;
+import android.media.Image;
 import android.os.Handler;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.CookieManager;
 import android.webkit.WebView;
 import android.widget.Toast;
+
+import org.opencv.core.Mat;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
@@ -22,7 +26,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.RandomAccessFile;
+import java.io.UnsupportedEncodingException;
+import java.nio.ByteBuffer;
 import java.nio.channels.FileChannel;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.text.SimpleDateFormat;
 import java.util.Collection;
 import java.util.Date;
@@ -78,68 +86,6 @@ public class ToolUtils {
         return result;
     }
 
-
-
-    private static String[] temp_urls = new String[]{
-            "/sys/devices/system/cpu/cpu0/cpufreq/cpu_temp",
-            "/sys/devices/system/cpu/cpu0/cpufreq/FakeShmoo_cpu_temp",
-            "/sys/devices/system/cpu/cpufreq/cput_attributes/cur_temp",
-            "/sys/devices/platform/tegra_tmon/temp1_input",
-            "/sys/devices/platform/tegra-i2c.3/i2c-4/4-004c/temperature",
-            "/sys/devices/platform/omap/omap_temp_sensor.0/temperature",
-            "/sys/devices/platform/s5p-tmu/temperature",
-            "/sys/devices/platform/s5p-tmu/curr_temp",
-            "/sys/devices/virtual/thermal/thermal_zone0/temp",
-            "/sys/devices/virtual/thermal/thermal_zone1/temp",
-            "/sys/devices/virtual/K3G_GYRO-dev/k3g/gyro_get_temp",
-            "/sys/kernel/debug/tegra_thermal/temp_tj",
-            "/sys/class/thermal/thermal_zone0/temp",
-            "/sys/class/thermal/thermal_zone1/temp",
-            "/sys/class/thermal/thermal_zone2/temp",
-            "/sys/class/thermal/thermal_zone3/temp",
-            "/sys/class/thermal/thermal_zone4/temp",
-            "/sys/class/hwmon/hwmon0/device/temp1_input",
-            "/sys/class/i2c-adapter/i2c-4/4-004c/temperature",
-    };
-
-    public static int getTemperature() {
-        // Iterate through String Array
-        // returns 0 if none found
-        // default temperature value retrieved in Celsius
-        boolean foundAlready = false;
-        int temp = 0, temp2 = 0;
-        String x;
-        for (int i = 0; i < temp_urls.length; i++) {
-            try {
-                RandomAccessFile reader = new RandomAccessFile(temp_urls[i], "r");
-                x = reader.readLine();
-                if (foundAlready) {
-                    // if temp value already found
-                    // take new one and average it with existing
-                    temp2 = Integer.parseInt(x);
-                    if (temp2 > 100) {
-                        temp2 = (temp2 / 1000);
-                    }
-                    temp = (temp + temp2) / 2;
-                    Log.d("EXCEPTION: ", "value " + temp2 + " found at p" + i);
-                    temp2 = 0;
-                } else {
-                    // if temp value hasn't been found yet, but found one!
-                    temp = Integer.parseInt(x);
-                    if (temp > 100) {
-                        temp = (temp / 1000);
-                    }
-                    foundAlready = true;
-                }
-                reader.close();
-            } catch (IOException e) {
-                Log.d("EXCEPTION: ", "file not at p" + i);
-            }
-        }
-        return temp;
-
-
-    }
 
     public static String DateToString(long time) {
         Date d = new Date(time);
@@ -218,6 +164,7 @@ public class ToolUtils {
     }
 
     public static void showToastMessage(Context acticity, String text, int duration) {
+        MyApplication.tts.speek(text,true,true);
         final Toast toast = Toast.makeText(acticity, text, Toast.LENGTH_SHORT);
         toast.show();
         Handler handler = new Handler();
@@ -251,7 +198,7 @@ public class ToolUtils {
         cookieManager.setAcceptFileSchemeCookies(true);
         cookieManager.setAcceptThirdPartyCookies(webview, true);
         cookieManager.setCookie(".idealbroker.cn", String.format("token=%s", MyApplication.user.getToken()));
-        //CookieManager.getInstance().setCookie("/", String.format("token=%s", MyApplication.user.getToken()));
+        //cookieManager.setCookie("/", String.format("token=%s", MyApplication.user.getToken()));
         cookieManager.flush();
         Log.e("cookie", String.format("get cookie info %s", cookieManager.getCookie("idealdoc.idealbroker.cn")));
         Log.e("COOKIE", MyApplication.user.getToken());
@@ -291,6 +238,198 @@ public class ToolUtils {
     public static String genVuexStoreActionStr(String t){
        return String.format("javascript:document.getElementById(\"app\").__vue_app__.config.globalProperties.$store.dispatch('%s')",t);
     }
+
+    /**
+     * 将字符串转成32 位MD5值
+     *
+     * @param string
+     * @return
+     */
+    public static String String2MD5(String string) {
+        byte[] hash;
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(
+                    string.getBytes("UTF-8"));
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+            return null;
+        }
+
+
+        StringBuilder hex = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            if ((b & 0xFF) < 0x10)
+                hex.append("0");
+            hex.append(Integer.toHexString(b & 0xFF));
+
+        }
+
+        return hex.toString();// 32位
+        //return hex.toString().toString().substring(8, 24);// 16位
+    }
+
+    public static Bitmap resizeBitmap(Bitmap bitmap, int w, int h) {
+        int width = bitmap.getWidth();
+        int height = bitmap.getHeight();
+
+        float scaleWidth = ((float) w) / width;
+        float scaleHeight = ((float) h) / height;
+
+        Matrix matrix = new Matrix();
+        matrix.postScale(scaleWidth, scaleHeight);
+
+        Bitmap resizedBitmap = Bitmap.createBitmap(bitmap, 0, 0, width,
+                height, matrix, true);
+        return resizedBitmap;
+    }
+
+    public static Bitmap Mat2Bitmap(Mat img) {
+        Bitmap bmp = Bitmap.createBitmap(img.width(), img.height(), Bitmap.Config.RGB_565);
+        org.opencv.android.Utils.matToBitmap(img, bmp);
+        return bmp;
+    }
+
+    public static Mat resizeMat(Mat image, float w, float h) {
+        org.opencv.core.Size size = new org.opencv.core.Size(w, h);
+        Mat img2 = new Mat(size, image.type());
+        Imgproc.resize(image, img2, img2.size());
+        return img2;
+    }
+
+
+    // This value is 2 ^ 18 - 1, and is used to clamp the RGB values before their ranges
+    // are normalized to eight bits.
+    static final int MAX_CHANNEL_VALUE = 262143;
+
+    static class yuv_frame {
+        byte[][] yuvBytes;
+        int[] argbArray;
+        int yPlane_RowStride;
+        int uPlane_RowStride;
+        int uPlane_PixelStride;
+        int width;
+        int height;
+    }
+
+    public static yuv_frame saveyuvCameraImage(Image imageProxy) {
+        yuv_frame frame = new yuv_frame();
+        Image.Plane yPlane = imageProxy.getPlanes()[0];
+        Image.Plane uPlane = imageProxy.getPlanes()[1];
+
+        frame.width = imageProxy.getWidth();
+        frame.height = imageProxy.getHeight();
+
+        frame.yuvBytes = new byte[3][];
+        frame.argbArray = new int[frame.width * frame.height];
+        for (int i = 0; i < imageProxy.getPlanes().length; i++) {
+            final ByteBuffer buffer = imageProxy.getPlanes()[i].getBuffer();
+            frame.yuvBytes[i] = new byte[buffer.capacity()];
+            buffer.get(frame.yuvBytes[i]);
+        }
+        frame.yPlane_RowStride = yPlane.getRowStride();
+        frame.uPlane_RowStride = uPlane.getRowStride();
+        frame.uPlane_PixelStride = uPlane.getPixelStride();
+        return frame;
+    }
+
+    public static Bitmap yuvCameraImageToBitmap(Image imageProxy) {
+
+        yuv_frame frame = saveyuvCameraImage(imageProxy);
+
+        convertYUV420ToARGB8888_java(
+                frame.yuvBytes[0],
+                frame.yuvBytes[1],
+                frame.yuvBytes[2],
+                frame.argbArray,
+                frame.width,
+                frame.height,
+                frame.yPlane_RowStride,
+                frame.uPlane_RowStride,
+                frame.uPlane_PixelStride
+        );
+
+       /* convertYUV420ToARGB8888(
+                frame.yuvBytes[0],
+                frame.yuvBytes[1],
+                frame.yuvBytes[2],
+                frame.argbArray,
+                frame.width,
+                frame.height,
+                frame.yPlane_RowStride,
+                frame.uPlane_RowStride,
+                frame.uPlane_PixelStride,
+                false
+        );*/
+
+        return Bitmap.createBitmap(frame.argbArray, frame.width, frame.height, Bitmap.Config.ARGB_8888);
+    }
+
+    public static Bitmap yuvCameraImageToBitmap(yuv_frame frame) {
+
+        convertYUV420ToARGB8888_java(
+                frame.yuvBytes[0],
+                frame.yuvBytes[1],
+                frame.yuvBytes[2],
+                frame.argbArray,
+                frame.width,
+                frame.height,
+                frame.yPlane_RowStride,
+                frame.uPlane_RowStride,
+                frame.uPlane_PixelStride
+        );
+
+        return Bitmap.createBitmap(frame.argbArray, frame.width, frame.height, Bitmap.Config.ARGB_8888);
+    }
+
+    public static void convertYUV420ToARGB8888_java(
+            byte[] yData,
+            byte[] uData,
+            byte[] vData,
+            int[] out,
+            int width,
+            int height,
+            int yRowStride,
+            int uvRowStride,
+            int uvPixelStride) {
+        int yp = 0;
+        for (int j = 0; j < height; j++) {
+            int pY = yRowStride * j;
+            int pUV = uvRowStride * (j >> 1);
+
+            for (int i = 0; i < width; i++) {
+                int uvOffset = pUV + (i >> 1) * uvPixelStride;
+                out[yp++] = yuv2Rgb(0xff & yData[pY + i], 0xff & uData[uvOffset], 0xff & vData[uvOffset]);
+            }
+        }
+    }
+
+    private static int yuv2Rgb(int y, int u, int v) {
+        // Adjust and check YUV values
+        y = (y - 16) < 0 ? 0 : (y - 16);
+        u -= 128;
+        v -= 128;
+
+        // This is the floating point equivalent. We do the conversion in integer
+        // because some Android devices do not have floating point in hardware.
+        // nR = (int)(1.164 * nY + 2.018 * nU);
+        // nG = (int)(1.164 * nY - 0.813 * nV - 0.391 * nU);
+        // nB = (int)(1.164 * nY + 1.596 * nV);
+        int y1192 = 1192 * y;
+        int r = (y1192 + 1634 * v);
+        int g = (y1192 - 833 * v - 400 * u);
+        int b = (y1192 + 2066 * u);
+
+        // Clipping RGB values to be inside boundaries [ 0 , MAX_CHANNEL_VALUE ]
+        r = r > MAX_CHANNEL_VALUE ? MAX_CHANNEL_VALUE : Math.max(r, 0);
+        g = g > MAX_CHANNEL_VALUE ? MAX_CHANNEL_VALUE : Math.max(g, 0);
+        b = b > MAX_CHANNEL_VALUE ? MAX_CHANNEL_VALUE : Math.max(b, 0);
+
+        return 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
+    }
+
 
 
 }

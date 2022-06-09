@@ -57,7 +57,7 @@ class User {
 
     public void login() {
         if (getToken().isEmpty()) return;
-        HttpRequest.GET(MyApplication.context, "/getuserdetail",
+        HttpRequest.GET(MyApplication.context, "/user/details",
                 new Parameter().add("token", getToken()), new ResponseListener() {
                     @Override
                     public void onResponse(String response, Exception error) {

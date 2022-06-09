@@ -4,6 +4,8 @@
     <!-- 读取网络信息状态 -->
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
     <uses-permission android:name="android.permission.INTERNET" /> <!-- 读取手机信息权限 -->
     <uses-permission android:name="android.permission.READ_PHONE_STATE" /> <!-- 读取联系人权限 -->
     <uses-permission android:name="android.permission.READ_CONTACTS" /> <!-- 外存储写权限 -->
@@ -25,6 +27,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.AiSee"
         android:usesCleartextTraffic="true">
+        <activity
+            android:name=".CameraActivity"
+            android:exported="false" />
+        <activity
+            android:name=".NewsViewerActivity"
+            android:exported="false" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
