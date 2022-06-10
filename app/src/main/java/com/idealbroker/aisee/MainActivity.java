@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity {
 
             @JavascriptInterface
             public void camera(){
-                Intent intent = new Intent(MainActivity.this, CameraActivity.class);
+                Intent intent = new Intent(MainActivity.this,OCRActivity.class);
                 startActivity(intent);
             }
 

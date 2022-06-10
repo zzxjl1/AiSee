@@ -2,10 +2,12 @@ package com.idealbroker.aisee;
 
 import org.opencv.core.CvType;
 import org.opencv.core.Mat;
+import org.opencv.core.MatOfKeyPoint;
 import org.opencv.core.MatOfPoint;
 import org.opencv.core.MatOfPoint2f;
 import org.opencv.core.Point;
 import org.opencv.core.Size;
+import org.opencv.features2d.FastFeatureDetector;
 import org.opencv.imgproc.Imgproc;
 
 import java.util.ArrayList;
@@ -40,6 +42,18 @@ public class detectDocument {
         return quad;
     }
 
+    public static MatOfKeyPoint findKeyPoints(Mat src) {
+
+        org.opencv.core.Size size = new org.opencv.core.Size(src.width(), src.height());
+        Mat blurred = new Mat(size,CvType.CV_8UC4);
+        Imgproc.GaussianBlur(src,blurred, new Size(3, 3), 0);
+        MatOfKeyPoint points = new MatOfKeyPoint();
+        FastFeatureDetector fast = FastFeatureDetector.create();
+        fast.setThreshold(20);
+        fast.detect(blurred, points);
+        return points;
+    }
+
     private static ArrayList<MatOfPoint> findContours(Mat src) {
 
         org.opencv.core.Size size = new org.opencv.core.Size(src.width(), src.height());
@@ -47,8 +61,8 @@ public class detectDocument {
         Mat cannedImage = new Mat(size, CvType.CV_8UC1);
 
         Imgproc.cvtColor(src, grayImage, Imgproc.COLOR_RGBA2GRAY, 4);
-        Imgproc.GaussianBlur(grayImage, grayImage, new Size(5, 5), 0);
-        Imgproc.Canny(grayImage, cannedImage, 75, 200);
+        Imgproc.GaussianBlur(grayImage, grayImage, new Size(3, 3), 0);
+        Imgproc.Canny(grayImage, cannedImage, 50, 200);
 
         ArrayList<MatOfPoint> contours = new ArrayList<MatOfPoint>();
         Mat hierarchy = new Mat();
