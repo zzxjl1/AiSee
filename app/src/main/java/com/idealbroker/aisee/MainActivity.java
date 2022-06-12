@@ -1,7 +1,6 @@
 package com.idealbroker.aisee;
 
 import android.content.Intent;
-import android.hardware.Camera;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -9,7 +8,6 @@ import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -48,6 +46,13 @@ public class MainActivity extends AppCompatActivity {
 
         webView = findViewById(R.id.webView);
         webView.setVerticalScrollBarEnabled(false);
+        webView.setLongClickable(true);
+        webView.setOnLongClickListener(new View.OnLongClickListener() {
+            @Override
+            public boolean onLongClick(View v) {
+                return true;
+            }
+        });
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
         webSettings.setUseWideViewPort(true); //将图片调整到适合webview的大小
@@ -138,39 +143,13 @@ public class MainActivity extends AppCompatActivity {
 
             @JavascriptInterface
             public void camera(){
-                Intent intent = new Intent(MainActivity.this,OCRActivity.class);
+                Intent intent = new Intent(MainActivity.this, ObjectDetectionActivity.class);
                 startActivity(intent);
             }
 
         }, "JS");
         webView.loadUrl("file:///android_asset/html/index.html");
         webView.setWebContentsDebuggingEnabled(true);
-
-
-        XXPermissions.with(this)
-                .permission(Permission.RECORD_AUDIO)
-                .request(new OnPermissionCallback() {
-
-                    @Override
-                    public void onGranted(List<String> permissions, boolean all) {
-                        if (all) {
-                            System.out.println("获取权限成功");
-                        } else {
-                            System.out.println("获取部分权限成功，但部分权限未正常授予");
-                        }
-                    }
-
-                    @Override
-                    public void onDenied(List<String> permissions, boolean never) {
-                        if (never) {
-                            System.out.println("被永久拒绝授权");
-                            finish();
-                        } else {
-                            System.out.println("获取权限失败");
-                        }
-                    }
-                });
-
 
     }
 

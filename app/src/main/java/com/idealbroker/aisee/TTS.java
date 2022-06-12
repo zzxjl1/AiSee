@@ -33,7 +33,7 @@ public class TTS {
                     try {
                         Thread.sleep(500);
                         //Log.e(TAG,"reading queue");
-                        if (!queue.isEmpty()&& !mp.isPlaying()) {
+                        if (!queue.isEmpty() && !mp.isPlaying()) {
                             File f = (File) queue.removeFirst();
                             play(f);
                         }
@@ -57,24 +57,26 @@ public class TTS {
         }
     }
 
-    private void download_handler(File f, boolean preemptive,boolean flush_queue) {
-        if(flush_queue)queue.clear();
-        if(preemptive){
+    private void download_handler(File f, boolean preemptive, boolean flush_queue) {
+        if (flush_queue) queue.clear();
+        if (preemptive) {
             play(f);
-        }else{
+        } else {
             queue.addLast(f);
         }
 
     }
 
-    public void speek(String text, boolean preemptive,boolean flush_queue) {
+    public void speek(String text, boolean preemptive, boolean flush_queue) {
+
+        if (text.isEmpty()) return;
         String url = String.format("/tts?text=%s", text);
-        File base_path = new File(MyApplication.context.getFilesDir().getPath() ,"tts_cache");
+        File base_path = new File(MyApplication.context.getCacheDir().getPath(), "tts");
         base_path.mkdir();
         File path = new File(base_path, String2MD5(url) + ".wav");
         if (path.exists()) {
             Log.e(TAG, "命中缓存");
-            download_handler(path, preemptive,flush_queue);
+            download_handler(path, preemptive, flush_queue);
             return;
         }
         HttpRequest.DOWNLOAD(
@@ -85,7 +87,7 @@ public class TTS {
                     @Override
                     public void onDownloadSuccess(File file) {
                         Log.e(TAG, "文件已下载完成");
-                        download_handler(file, preemptive,flush_queue);
+                        download_handler(file, preemptive, flush_queue);
                     }
 
                     @Override

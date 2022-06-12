@@ -16,6 +16,9 @@ import android.view.View;
 import androidx.annotation.Nullable;
 import androidx.core.app.ActivityCompat;
 
+import com.hjq.permissions.OnPermissionCallback;
+import com.hjq.permissions.Permission;
+import com.hjq.permissions.XXPermissions;
 import com.kongzue.dialogx.dialogs.MessageDialog;
 import com.kongzue.dialogx.dialogs.PopTip;
 import com.kongzue.dialogx.interfaces.OnDialogButtonClickListener;
@@ -29,6 +32,7 @@ import org.json.JSONObject;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -49,7 +53,27 @@ public class MicService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         Log.e(TAG, "onStartCommand");
-        start();
+        if (!XXPermissions.isGranted(MyApplication.context, Permission.RECORD_AUDIO)) {
+            MyApplication.tts.speek("本功能需要麦克风权限，请在弹出的对话框中点击“允许”按钮！", true, true);
+            XXPermissions.with(MainActivity.base)
+                    .permission(Permission.RECORD_AUDIO)
+                    .request(new OnPermissionCallback() {
+
+                        @Override
+                        public void onGranted(List<String> permissions, boolean all) {
+                            start();
+                        }
+
+                        @Override
+                        public void onDenied(List<String> permissions, boolean never) {
+                            ToolUtils.showToastMessage(MyApplication.context, "权限获取失败", 2000);
+                            MyApplication.tts.speek("权限获取失败，功能无法运行！", true, true);
+                            stopSelf();
+                        }
+                    });
+        } else {
+            start();
+        }
         return super.onStartCommand(intent, flags, startId);
     }
 
@@ -76,9 +100,11 @@ public class MicService extends Service {
     public static void stop() {
         running = false;
         MyApplication.tts.speek("语音控制：关", true, true);
-        mAudioRecord.stop();
-        mAudioRecord.release();
-        ws.close();
+        if (mAudioRecord != null) {
+            mAudioRecord.stop();
+            mAudioRecord.release();
+        }
+        if (ws != null) ws.close();
         refreshMicServiceState();
     }
 
