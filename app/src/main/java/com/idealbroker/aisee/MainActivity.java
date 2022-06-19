@@ -6,10 +6,14 @@ import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
 import android.webkit.ValueCallback;
+import android.webkit.WebResourceRequest;
+import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.webkit.WebViewAssetLoader;
+import androidx.webkit.WebViewClientCompat;
 
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
@@ -44,6 +48,10 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         base = this;
 
+        final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                .setDomain("aisee.idealbroker.cn")
+                .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(this))
+                .build();
         webView = findViewById(R.id.webView);
         webView.setVerticalScrollBarEnabled(false);
         webView.setLongClickable(true);
@@ -53,21 +61,23 @@ public class MainActivity extends AppCompatActivity {
                 return true;
             }
         });
+        webView.setWebViewClient(new WebViewClientCompat() {
+            @Override
+            public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                return assetLoader.shouldInterceptRequest(request.getUrl());
+            }
+        });
         WebSettings webSettings = webView.getSettings();
         webSettings.setJavaScriptEnabled(true);
-        webSettings.setUseWideViewPort(true); //将图片调整到适合webview的大小
-        webSettings.setLoadWithOverviewMode(true); // 缩放至屏幕的大小
+        webSettings.setUseWideViewPort(true);
         webSettings.setSupportZoom(false);
-        webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-        webSettings.setAllowFileAccess(true); //设置可以访问文件
         webSettings.setCacheMode(WebSettings.LOAD_DEFAULT);
         webSettings.setDomStorageEnabled(true);
         webSettings.setAppCacheEnabled(true);
-        webSettings.setAllowUniversalAccessFromFileURLs(true);
         webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
         webSettings.setAppCachePath(getApplication().getCacheDir().getAbsolutePath());
         webSettings.setDatabaseEnabled(true);
-        webSettings.setUserAgentString(webSettings.getUserAgentString() + " TooMuchAI/" + ToolUtils.getLocalVersion(getApplicationContext()));
+        webSettings.setUserAgentString(webSettings.getUserAgentString() + " AiSee/" + ToolUtils.getLocalVersion(getApplicationContext()));
         webView.addJavascriptInterface(new Object() {
 
             @JavascriptInterface
@@ -146,9 +156,15 @@ public class MainActivity extends AppCompatActivity {
                 Intent intent = new Intent(MainActivity.this, ObjectDetectionActivity.class);
                 startActivity(intent);
             }
+            @JavascriptInterface
+            public void showNewsDetail(int id){
+                Intent intent = new Intent(MainActivity.this, NewsViewerActivity.class);
+                intent.putExtra("id",id);
+                startActivity(intent);
+            }
 
         }, "JS");
-        webView.loadUrl("file:///android_asset/html/index.html");
+        webView.loadUrl("https://aisee.idealbroker.cn/assets/html/index.html");
         webView.setWebContentsDebuggingEnabled(true);
 
     }

@@ -198,7 +198,7 @@ public class ToolUtils {
         cookieManager.setAcceptFileSchemeCookies(true);
         cookieManager.setAcceptThirdPartyCookies(webview, true);
         cookieManager.setCookie(".idealbroker.cn", String.format("token=%s", MyApplication.user.getToken()));
-        //cookieManager.setCookie("/", String.format("token=%s", MyApplication.user.getToken()));
+        //cookieManager.setCookie("192.168.31.114:4000", String.format("token=%s", MyApplication.user.getToken()));
         cookieManager.flush();
         Log.e("cookie", String.format("get cookie info %s", cookieManager.getCookie("idealdoc.idealbroker.cn")));
         Log.e("COOKIE", MyApplication.user.getToken());

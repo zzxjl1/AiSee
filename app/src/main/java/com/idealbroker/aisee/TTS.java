@@ -31,7 +31,7 @@ public class TTS {
             public void run() {
                 while (true) {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(100);
                         //Log.e(TAG,"reading queue");
                         if (!queue.isEmpty() && !mp.isPlaying()) {
                             File f = (File) queue.removeFirst();
@@ -65,6 +65,11 @@ public class TTS {
             queue.addLast(f);
         }
 
+    }
+
+    public void stop() {
+        queue.clear();
+        mp.reset();
     }
 
     public void speek(String text, boolean preemptive, boolean flush_queue) {

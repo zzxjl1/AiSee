@@ -61,7 +61,7 @@ public class ObjectDetectionActivity extends CameraActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        MyApplication.tts.speek("退出AI读书", true, true);
+        MyApplication.tts.speek("退出AI识物", true, true);
     }
 
     void speek(String t) {
