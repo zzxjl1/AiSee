@@ -49,6 +49,9 @@
             android:name=".ObjectDetectionActivity"
             android:exported="false" />
         <activity
+            android:name=".OCRActivity"
+            android:exported="false" />
+        <activity
             android:name=".NewsViewerActivity"
             android:exported="false" />
         <activity

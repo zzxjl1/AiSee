@@ -27,13 +27,13 @@ import java.util.List;
 
 
 public class ObjectDetectionActivity extends CameraActivity {
-    private String TAG = "AIRead";
+    private String TAG = "AIRec";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         toggle_assist_mode(true);
         super.onCreate(savedInstanceState);
-        MyApplication.tts.speek("AI读书", false, false);
+        MyApplication.tts.speek("AI识物", false, false);
         MyApplication.tts.speek("请将镜头对准要识别的页面，并拍照", false, false);
 
         if(!XXPermissions.isGranted(this,Permission.CAMERA)){
@@ -70,9 +70,9 @@ public class ObjectDetectionActivity extends CameraActivity {
 
     @Override
     public void onCapture(Bitmap bmp) {
-        File PATH = new File(getCacheDir(), "ocr");
+        File PATH = new File(getCacheDir(), "obj");
         if (!PATH.exists()) PATH.mkdir();
-        File file = new File(PATH, "ocr_temp.jpg");
+        File file = new File(PATH, "obj_temp.jpg");
         try (FileOutputStream out = new FileOutputStream(file)) {
             bmp.compress(Bitmap.CompressFormat.JPEG, 80, out);
             WaitDialog.show("请求中");

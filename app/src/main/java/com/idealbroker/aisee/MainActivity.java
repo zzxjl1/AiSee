@@ -10,6 +10,7 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebResourceResponse;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.webkit.WebViewAssetLoader;
@@ -23,9 +24,11 @@ import com.kongzue.baseokhttp.listener.ResponseListener;
 import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.Parameter;
 
+import com.kongzue.dialogx.dialogs.FullScreenDialog;
 import com.kongzue.dialogx.dialogs.MessageDialog;
 import com.kongzue.dialogx.dialogs.WaitDialog;
 import com.kongzue.dialogx.interfaces.BaseDialog;
+import com.kongzue.dialogx.interfaces.OnBindView;
 import com.kongzue.dialogx.interfaces.OnDialogButtonClickListener;
 import com.tencent.tauth.IUiListener;
 import com.tencent.tauth.Tencent;
@@ -152,14 +155,57 @@ public class MainActivity extends AppCompatActivity {
             }
 
             @JavascriptInterface
-            public void camera(){
+            public void obj() {
                 Intent intent = new Intent(MainActivity.this, ObjectDetectionActivity.class);
                 startActivity(intent);
             }
+
             @JavascriptInterface
-            public void showNewsDetail(int id){
+            public void ocr() {
+                Intent intent = new Intent(MainActivity.this, OCRActivity.class);
+                startActivity(intent);
+            }
+
+            @JavascriptInterface
+            public void aboutus() {
+                MainActivity.base.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
+                            @Override
+                            public void onBind(final FullScreenDialog dialog, View v) {
+                                View btnClose = v.findViewById(R.id.btn_close);
+                                WebView webView = v.findViewById(R.id.webView);
+                                TextView textView = v.findViewById(R.id.title);
+                                String title = "关于我们";
+                                textView.setText(title.toCharArray(),0,title.length());
+                                btnClose.setOnClickListener(new View.OnClickListener() {
+                                    @Override
+                                    public void onClick(View v) {
+                                        dialog.dismiss();
+                                    }
+                                });
+
+                                WebSettings webSettings = webView.getSettings();
+                                webSettings.setJavaScriptEnabled(true);
+                                webSettings.setLoadWithOverviewMode(true);
+                                webSettings.setUseWideViewPort(true);
+                                webSettings.setSupportZoom(false);
+                                webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                                webSettings.setLoadsImagesAutomatically(true);
+
+                                webView.loadUrl("https://faculty.nuist.edu.cn/xuxiaolong/zh_CN/index/87901/list/index.htm");
+                            }
+                        }).show();
+                    }
+                });
+
+            }
+
+            @JavascriptInterface
+            public void showNewsDetail(int id) {
                 Intent intent = new Intent(MainActivity.this, NewsViewerActivity.class);
-                intent.putExtra("id",id);
+                intent.putExtra("id", id);
                 startActivity(intent);
             }
 
@@ -274,7 +320,7 @@ public class MainActivity extends AppCompatActivity {
     public void onBackPressed() {
 
         if ((System.currentTimeMillis() - exitTime) > 2000) {
-            ToolUtils.showToastMessage(MyApplication.context,"再按一次退出程序",2000);
+            ToolUtils.showToastMessage(MyApplication.context, "再按一次退出程序", 2000);
             exitTime = System.currentTimeMillis();
         } else {
             finish();
