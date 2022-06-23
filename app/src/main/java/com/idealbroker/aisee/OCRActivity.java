@@ -1,5 +1,7 @@
 package com.idealbroker.aisee;
 
+import static com.idealbroker.aisee.ToolUtils.dp2px;
+
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,17 +19,26 @@ import androidx.webkit.WebViewClientCompat;
 import com.hjq.permissions.OnPermissionCallback;
 import com.hjq.permissions.Permission;
 import com.hjq.permissions.XXPermissions;
+import com.idealbroker.aisee.opencv.Camera2View;
 import com.kongzue.baseokhttp.HttpRequest;
 import com.kongzue.baseokhttp.listener.ResponseListener;
+import com.kongzue.baseokhttp.util.BaseOkHttp;
 import com.kongzue.baseokhttp.util.Parameter;
 import com.kongzue.dialogx.dialogs.FullScreenDialog;
 import com.kongzue.dialogx.dialogs.WaitDialog;
+import com.kongzue.dialogx.interfaces.DialogLifecycleCallback;
 import com.kongzue.dialogx.interfaces.OnBindView;
 import com.kongzue.dialogx.util.views.ActivityScreenShotImageView;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.opencv.core.Mat;
+import org.opencv.core.Point;
+import org.opencv.core.Rect;
+import org.opencv.core.Scalar;
+import org.opencv.core.Size;
+import org.opencv.imgproc.Imgproc;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -43,7 +54,7 @@ public class OCRActivity extends CameraActivity {
         toggle_assist_mode(true);
         super.onCreate(savedInstanceState);
         MyApplication.tts.speek("AI读书", false, false);
-        MyApplication.tts.speek("请将要识别的页面放置在方框区域内，并按下拍照按钮", false, false);
+        MyApplication.tts.speek("请将要识别的页面放置在红色方框区域内，并按下拍照按钮", false, false);
 
         if (!XXPermissions.isGranted(this, Permission.CAMERA)) {
             MyApplication.tts.speek("本功能需要相机权限，请在弹出的对话框中点击“允许”按钮！", true, true);
@@ -76,6 +87,7 @@ public class OCRActivity extends CameraActivity {
 
     @Override
     public void onCapture(Bitmap bmp) {
+        bmp = Bitmap.createBitmap(bmp,crop_rect.x,crop_rect.y,crop_rect.width,crop_rect.height);
         File PATH = new File(getCacheDir(), "ocr");
         if (!PATH.exists()) PATH.mkdir();
         File file = new File(PATH, "ocr_temp.jpg");
@@ -120,17 +132,40 @@ public class OCRActivity extends CameraActivity {
             e.printStackTrace();
         }
     }
+    Rect crop_rect = null;
+    @Override
+    public Mat onCameraFrame(Camera2View.Camera2Frame inputFrame) {
 
+        Mat t = super.onCameraFrame(inputFrame);
+        if(crop_rect==null){
+            int w = t.width();
+            int h = t.height();
+            int margin_left_right = dp2px(OCRActivity.this,60);
+            int margin_top = dp2px(OCRActivity.this,110);
+            int margin_bottom  =dp2px(OCRActivity.this,160);
+            crop_rect = new Rect(margin_top, margin_left_right,w-margin_bottom-margin_top , h-margin_left_right*2);
+        }
+
+        Imgproc.rectangle(t, new Point(crop_rect.x,crop_rect.y), new Point(
+                crop_rect.width+crop_rect.x , crop_rect.height+crop_rect.y), new Scalar(255, 0, 0), 20);
+
+        return t;
+    }
+    WebView webView;
     private void showFullscreenDialog(String t) {
         FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
             @Override
             public void onBind(final FullScreenDialog dialog, View v) {
                 View btnClose = v.findViewById(R.id.btn_close);
-                WebView webView = v.findViewById(R.id.webView);
+                webView = v.findViewById(R.id.webView);
                 webView.addJavascriptInterface(new Object() {
                     @JavascriptInterface
                     public String fetch() {
                         return t;
+                    }
+                    @JavascriptInterface
+                    public String get_httpBaseUrl() {
+                        return BaseOkHttp.serviceUrl;
                     }
                 }, "JS");
                 btnClose.setOnClickListener(new View.OnClickListener() {
@@ -163,7 +198,13 @@ public class OCRActivity extends CameraActivity {
                 webView.setWebContentsDebuggingEnabled(true);
 
             }
-        }).setHideZoomBackground(true).show();
+        }).setHideZoomBackground(true).setDialogLifecycleCallback(new DialogLifecycleCallback<FullScreenDialog>() {
+            @Override
+            public void onDismiss(FullScreenDialog dialog) {
+                super.onDismiss(dialog);
+                webView.destroy();
+            }
+        }).show();
     }
 
 }

@@ -28,6 +28,7 @@ import com.kongzue.dialogx.dialogs.FullScreenDialog;
 import com.kongzue.dialogx.dialogs.MessageDialog;
 import com.kongzue.dialogx.dialogs.WaitDialog;
 import com.kongzue.dialogx.interfaces.BaseDialog;
+import com.kongzue.dialogx.interfaces.DialogLifecycleCallback;
 import com.kongzue.dialogx.interfaces.OnBindView;
 import com.kongzue.dialogx.interfaces.OnDialogButtonClickListener;
 import com.tencent.tauth.IUiListener;
@@ -171,32 +172,7 @@ public class MainActivity extends AppCompatActivity {
                 MainActivity.base.runOnUiThread(new Runnable() {
                     @Override
                     public void run() {
-                        FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
-                            @Override
-                            public void onBind(final FullScreenDialog dialog, View v) {
-                                View btnClose = v.findViewById(R.id.btn_close);
-                                WebView webView = v.findViewById(R.id.webView);
-                                TextView textView = v.findViewById(R.id.title);
-                                String title = "关于我们";
-                                textView.setText(title.toCharArray(),0,title.length());
-                                btnClose.setOnClickListener(new View.OnClickListener() {
-                                    @Override
-                                    public void onClick(View v) {
-                                        dialog.dismiss();
-                                    }
-                                });
-
-                                WebSettings webSettings = webView.getSettings();
-                                webSettings.setJavaScriptEnabled(true);
-                                webSettings.setLoadWithOverviewMode(true);
-                                webSettings.setUseWideViewPort(true);
-                                webSettings.setSupportZoom(false);
-                                webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
-                                webSettings.setLoadsImagesAutomatically(true);
-
-                                webView.loadUrl("https://faculty.nuist.edu.cn/xuxiaolong/zh_CN/index/87901/list/index.htm");
-                            }
-                        }).show();
+                        showAbout();
                     }
                 });
 
@@ -209,9 +185,126 @@ public class MainActivity extends AppCompatActivity {
                 startActivity(intent);
             }
 
+            @JavascriptInterface
+            public void favorite() {
+                MainActivity.base.runOnUiThread(new Runnable() {
+                    @Override
+                    public void run() {
+                        showFavorite();
+                    }
+                });
+            }
+
         }, "JS");
         webView.loadUrl("https://aisee.idealbroker.cn/assets/html/index.html");
         webView.setWebContentsDebuggingEnabled(true);
+
+    }
+
+    WebView about_webview;
+
+    void showAbout() {
+        FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
+            @Override
+            public void onBind(final FullScreenDialog dialog, View v) {
+                View btnClose = v.findViewById(R.id.btn_close);
+                about_webview = v.findViewById(R.id.webView);
+                TextView textView = v.findViewById(R.id.title);
+                String title = "关于我们";
+                textView.setText(title.toCharArray(), 0, title.length());
+                btnClose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                WebSettings webSettings = about_webview.getSettings();
+                webSettings.setJavaScriptEnabled(true);
+                webSettings.setLoadWithOverviewMode(true);
+                webSettings.setUseWideViewPort(true);
+                webSettings.setSupportZoom(false);
+                webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                webSettings.setLoadsImagesAutomatically(true);
+
+                about_webview.loadUrl("https://faculty.nuist.edu.cn/xuxiaolong/zh_CN/index/87901/list/index.htm");
+            }
+        }).setDialogLifecycleCallback(new DialogLifecycleCallback<FullScreenDialog>() {
+            @Override
+            public void onDismiss(FullScreenDialog dialog) {
+                super.onDismiss(dialog);
+                about_webview.destroy();
+            }
+        }).show();
+    }
+
+
+    WebView favorite_webview;
+
+    void showFavorite() {
+        FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
+            @Override
+            public void onBind(final FullScreenDialog dialog, View v) {
+                View btnClose = v.findViewById(R.id.btn_close);
+                favorite_webview = v.findViewById(R.id.webView);
+                TextView textView = v.findViewById(R.id.title);
+                String title = "收藏";
+                textView.setText(title.toCharArray(), 0, title.length());
+                favorite_webview.addJavascriptInterface(new Object() {
+                    @JavascriptInterface
+                    public void showNewsDetail(int id) {
+                        Intent intent = new Intent(MainActivity.this, NewsViewerActivity.class);
+                        intent.putExtra("id", id);
+                        startActivity(intent);
+                        dialog.dismiss();
+                    }
+
+                    @JavascriptInterface
+                    public String get_httpBaseUrl() {
+                        return BaseOkHttp.serviceUrl;
+                    }
+
+                    @JavascriptInterface
+                    public String get_token() {
+                        return MyApplication.user.getToken();
+                    }
+
+                }, "JS");
+                btnClose.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        dialog.dismiss();
+                    }
+                });
+
+                WebSettings webSettings = favorite_webview.getSettings();
+                webSettings.setJavaScriptEnabled(true);
+                webSettings.setLoadWithOverviewMode(true);
+                webSettings.setUseWideViewPort(true);
+                webSettings.setSupportZoom(false);
+                webSettings.setJavaScriptCanOpenWindowsAutomatically(true);
+                webSettings.setLoadsImagesAutomatically(true);
+                webSettings.setMixedContentMode(WebSettings.MIXED_CONTENT_ALWAYS_ALLOW);
+                final WebViewAssetLoader assetLoader = new WebViewAssetLoader.Builder()
+                        .setDomain("aisee.idealbroker.cn")
+                        .addPathHandler("/assets/", new WebViewAssetLoader.AssetsPathHandler(MainActivity.this))
+                        .build();
+                favorite_webview.setWebViewClient(new WebViewClientCompat() {
+                    @Override
+                    public WebResourceResponse shouldInterceptRequest(WebView view, WebResourceRequest request) {
+                        return assetLoader.shouldInterceptRequest(request.getUrl());
+                    }
+                });
+                favorite_webview.loadUrl("https://aisee.idealbroker.cn/assets/html/favorite.html");
+                favorite_webview.setWebContentsDebuggingEnabled(true);
+            }
+        }).setHideZoomBackground(true).setDialogLifecycleCallback(new DialogLifecycleCallback<FullScreenDialog>() {
+            @Override
+            public void onDismiss(FullScreenDialog dialog) {
+                super.onDismiss(dialog);
+                favorite_webview.destroy();
+            }
+        }).show();
 
     }
 

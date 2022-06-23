@@ -39,6 +39,21 @@ import java.util.zip.ZipOutputStream;
 
 public class ToolUtils {
 
+    /**
+     * 根据手机的分辨率从 dp 的单位 转成为 px(像素)
+     */
+    public static int dp2px(Context context, float dpValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dpValue * scale + 0.5f);
+    }
+
+    /**
+     * 根据手机的分辨率从 px(像素) 的单位 转成为 dp
+     */
+    public static int px2dp(Context context, float pxValue) {
+        final float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (pxValue / scale + 0.5f);
+    }
 
 
     public static File moveFile(File file, File dir) throws IOException {
@@ -164,7 +179,7 @@ public class ToolUtils {
     }
 
     public static void showToastMessage(Context acticity, String text, int duration) {
-        MyApplication.tts.speek(text,true,true);
+        MyApplication.tts.speek(text, true, true);
         final Toast toast = Toast.makeText(acticity, text, Toast.LENGTH_SHORT);
         toast.show();
         Handler handler = new Handler();
@@ -235,8 +250,8 @@ public class ToolUtils {
         }
     }
 
-    public static String genVuexStoreActionStr(String t){
-       return String.format("javascript:document.getElementById(\"app\").__vue_app__.config.globalProperties.$store.dispatch('%s')",t);
+    public static String genVuexStoreActionStr(String t) {
+        return String.format("javascript:document.getElementById(\"app\").__vue_app__.config.globalProperties.$store.dispatch('%s')", t);
     }
 
     /**
@@ -429,7 +444,6 @@ public class ToolUtils {
 
         return 0xff000000 | ((r << 6) & 0xff0000) | ((g >> 2) & 0xff00) | ((b >> 10) & 0xff);
     }
-
 
 
 }
