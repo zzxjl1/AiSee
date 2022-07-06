@@ -24,14 +24,13 @@
     <string name="network">网络</string>
     <string name="back_to_default">恢复默认</string>
 
-    <string name="capture_compatible_mode_title">兼容模式</string>
+    <string name="volume_lock_title">音量锁定</string>
     <string name="http_base_url">HTTP请求地址</string>
     <string name="http_base_url_default">https://aisee.idealbroker.cn</string>
     <string name="ws_base_url">WebSocket请求地址</string>
     <string name="ws_base_url_default">wss://aisee.idealbroker.cn</string>
     <!-- Preferences -->
-    <string name="capture_compatible_mode_summary">启用本项可以解决闪退的问题，但会加大资源消耗</string>
-    <string name="title_activity_settings2">SettingsActivity2</string>
+    <string name="volume_lock_summary">锁定系统音量大小，防止静音状态下听不到语音播报</string>
 
 
 </resources>

@@ -2,6 +2,8 @@ package com.idealbroker.aisee;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Log;
 import android.view.View;
 import android.webkit.JavascriptInterface;
@@ -26,6 +28,7 @@ import com.kongzue.baseokhttp.util.Parameter;
 
 import com.kongzue.dialogx.dialogs.FullScreenDialog;
 import com.kongzue.dialogx.dialogs.MessageDialog;
+import com.kongzue.dialogx.dialogs.PopTip;
 import com.kongzue.dialogx.dialogs.WaitDialog;
 import com.kongzue.dialogx.interfaces.BaseDialog;
 import com.kongzue.dialogx.interfaces.DialogLifecycleCallback;
@@ -44,6 +47,106 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
     public static MainActivity base;
     public static WebView webView;
+    Object webviewObj = new Object() {
+
+        @JavascriptInterface
+        public void logout() {
+            MyApplication.tts.speek("确定要退出登录吗?", true, true);
+            MessageDialog.build()
+                    .setTitle("确定要退出登录吗?")
+                    .setMessage(null)
+                    .setCancelButton("取消", new OnDialogButtonClickListener() {
+                        @Override
+                        public boolean onClick(BaseDialog baseDialog, View v) {
+                            MyApplication.tts.speek("取消", true, true);
+                            return false;
+                        }
+                    })
+                    .setOkButton("确定", new OnDialogButtonClickListener() {
+                        @Override
+                        public boolean onClick(BaseDialog baseDialog, View v) {
+                            MyApplication.tts.speek("退出登录成功", true, true);
+                            MyApplication.user.logout();
+                            return false;
+                        }
+                    })
+                    .show();
+        }
+
+        @JavascriptInterface
+        public void qqlogin() {
+            MyApplication.tts.speek("开始QQ登录", true, true);
+            MyApplication.mTencent.login(MainActivity.this, "all", QQLoginListener);
+        }
+
+        @JavascriptInterface
+        public String get_loginState() {
+            return MyApplication.user.getLoginState().toString();
+        }
+
+        @JavascriptInterface
+        public String get_token() {
+            return MyApplication.user.getToken();
+        }
+
+
+        @JavascriptInterface
+        public void toggle_micService() {
+            Intent intent = new Intent(MainActivity.this, MicService.class);
+            if (!MicService.isRunning()) {
+                startService(intent);
+            } else {
+                stopService(intent);
+            }
+        }
+
+        @JavascriptInterface
+        public boolean get_micServiceState() {
+            return MicService.isRunning();
+        }
+
+        @JavascriptInterface
+        public String get_httpBaseUrl() {
+            return BaseOkHttp.serviceUrl;
+        }
+
+        @JavascriptInterface
+        public void speek(String text, boolean preemptive, boolean flush_queue) {
+            MyApplication.tts.speek(text, preemptive, flush_queue);
+        }
+
+        @JavascriptInterface
+        public void settings() {
+            launch_settings();
+        }
+
+        @JavascriptInterface
+        public void obj() {
+            launch_obj();
+        }
+
+        @JavascriptInterface
+        public void ocr() {
+            launch_ocr();
+        }
+
+        @JavascriptInterface
+        public void aboutus() {
+            launch_aboutus();
+        }
+
+        @JavascriptInterface
+        public void favorite() {
+            launch_favorite();
+        }
+
+        @JavascriptInterface
+        public void showNewsDetail(int id) {
+            Intent intent = new Intent(MainActivity.this, NewsViewerActivity.class);
+            intent.putExtra("id", id);
+            startActivity(intent);
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -82,128 +185,75 @@ public class MainActivity extends AppCompatActivity {
         webSettings.setAppCachePath(getApplication().getCacheDir().getAbsolutePath());
         webSettings.setDatabaseEnabled(true);
         webSettings.setUserAgentString(webSettings.getUserAgentString() + " AiSee/" + ToolUtils.getLocalVersion(getApplicationContext()));
-        webView.addJavascriptInterface(new Object() {
-
-            @JavascriptInterface
-            public void logout() {
-                MyApplication.tts.speek("确定要退出登录吗?", true, true);
-                MessageDialog.build()
-                        .setTitle("确定要退出登录吗?")
-                        .setMessage(null)
-                        .setCancelButton("取消", new OnDialogButtonClickListener() {
-                            @Override
-                            public boolean onClick(BaseDialog baseDialog, View v) {
-                                MyApplication.tts.speek("取消", true, true);
-                                return false;
-                            }
-                        })
-                        .setOkButton("确定", new OnDialogButtonClickListener() {
-                            @Override
-                            public boolean onClick(BaseDialog baseDialog, View v) {
-                                MyApplication.tts.speek("退出登录成功", true, true);
-                                MyApplication.user.logout();
-                                return false;
-                            }
-                        })
-                        .show();
-            }
-
-            @JavascriptInterface
-            public void qqlogin() {
-                MyApplication.tts.speek("开始QQ登录", true, true);
-                MyApplication.mTencent.login(MainActivity.this, "all", QQLoginListener);
-            }
-
-            @JavascriptInterface
-            public String get_loginState() {
-                return MyApplication.user.getLoginState().toString();
-            }
-
-            @JavascriptInterface
-            public String get_token() {
-                return MyApplication.user.getToken();
-            }
-
-            @JavascriptInterface
-            public void settings() {
-                Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
-                startActivity(intent);
-            }
-
-            @JavascriptInterface
-            public void toggle_micService() {
-                Intent intent = new Intent(MainActivity.this, MicService.class);
-                if (!MicService.isRunning()) {
-                    startService(intent);
-                } else {
-                    stopService(intent);
-                }
-            }
-
-            @JavascriptInterface
-            public boolean get_micServiceState() {
-                return MicService.isRunning();
-            }
-
-            @JavascriptInterface
-            public String get_httpBaseUrl() {
-                return BaseOkHttp.serviceUrl;
-            }
-
-            @JavascriptInterface
-            public void speek(String text, boolean preemptive, boolean flush_queue) {
-                MyApplication.tts.speek(text, preemptive, flush_queue);
-            }
-
-            @JavascriptInterface
-            public void obj() {
-                Intent intent = new Intent(MainActivity.this, ObjectDetectionActivity.class);
-                startActivity(intent);
-            }
-
-            @JavascriptInterface
-            public void ocr() {
-                Intent intent = new Intent(MainActivity.this, OCRActivity.class);
-                startActivity(intent);
-            }
-
-            @JavascriptInterface
-            public void aboutus() {
-                MainActivity.base.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showAbout();
-                    }
-                });
-
-            }
-
-            @JavascriptInterface
-            public void showNewsDetail(int id) {
-                Intent intent = new Intent(MainActivity.this, NewsViewerActivity.class);
-                intent.putExtra("id", id);
-                startActivity(intent);
-            }
-
-            @JavascriptInterface
-            public void favorite() {
-                MainActivity.base.runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        showFavorite();
-                    }
-                });
-            }
-
-        }, "JS");
+        webView.addJavascriptInterface(webviewObj, "JS");
         webView.loadUrl("https://aisee.idealbroker.cn/assets/html/index.html");
         webView.setWebContentsDebuggingEnabled(true);
 
+        MicService.setCallback(new STTCallback() {
+            @Override
+            void onProcedure(String text) {
+                super.onProcedure(text);
+            }
+
+            @Override
+            void onEnd(String text) {
+                super.onEnd(text);
+                new Handler(Looper.getMainLooper()).postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        parseSTTResult(text);
+                    }
+                },1500);
+            }
+        });
+    }
+
+    void toggleTab(String name) {
+        String url = String.format("https://aisee.idealbroker.cn/assets/html/index.html#%s", name);
+
+        MainActivity.base.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (webView != null)
+                    webView.loadUrl(url);
+            }
+        });
+    }
+
+    private void parseSTTResult(String text) {
+        if (text.contains("退出")) {
+            finish();
+        }
+        if (text.contains("读书")) {
+            launch_ocr();
+        }
+        if (text.contains("识图")) {
+            launch_obj();
+        }
+        if (text.contains("设置")) {
+            launch_settings();
+        }
+        if (text.contains("关于")) {
+            launch_aboutus();
+        }
+        if (text.contains("收藏")) {
+            launch_favorite();
+        }
+        if (text.contains("新闻")) {
+            toggleTab("");
+        }
+        if (text.contains("搜索")) {
+            toggleTab("search");
+        }
+        if (text.contains("工具箱")) {
+            toggleTab("toolbox");
+        }
     }
 
     WebView about_webview;
 
     void showAbout() {
+        MyApplication.tts.speek("关于我们", true, true);
         FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
             @Override
             public void onBind(final FullScreenDialog dialog, View v) {
@@ -234,6 +284,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDismiss(FullScreenDialog dialog) {
                 super.onDismiss(dialog);
                 about_webview.destroy();
+                MyApplication.tts.speek("退出关于我们", true, true);
             }
         }).show();
     }
@@ -242,6 +293,7 @@ public class MainActivity extends AppCompatActivity {
     WebView favorite_webview;
 
     void showFavorite() {
+        MyApplication.tts.speek("我的收藏", true, true);
         FullScreenDialog.build(new OnBindView<FullScreenDialog>(R.layout.layout_full_webview) {
             @Override
             public void onBind(final FullScreenDialog dialog, View v) {
@@ -303,6 +355,7 @@ public class MainActivity extends AppCompatActivity {
             public void onDismiss(FullScreenDialog dialog) {
                 super.onDismiss(dialog);
                 favorite_webview.destroy();
+                MyApplication.tts.speek("退出我的收藏", true, true);
             }
         }).show();
 
@@ -420,6 +473,45 @@ public class MainActivity extends AppCompatActivity {
         }
 
 
+    }
+
+
+    public void launch_settings() {
+        Intent intent = new Intent(MainActivity.this, SettingsActivity.class);
+        startActivity(intent);
+    }
+
+
+    public void launch_obj() {
+        Intent intent = new Intent(MainActivity.this, ObjectDetectionActivity.class);
+        startActivity(intent);
+    }
+
+
+    public void launch_ocr() {
+        Intent intent = new Intent(MainActivity.this, OCRActivity.class);
+        startActivity(intent);
+    }
+
+
+    public void launch_aboutus() {
+        MainActivity.base.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showAbout();
+            }
+        });
+
+    }
+
+
+    public void launch_favorite() {
+        MainActivity.base.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                showFavorite();
+            }
+        });
     }
 
 }

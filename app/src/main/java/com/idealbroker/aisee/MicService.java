@@ -29,13 +29,12 @@ import org.java_websocket.extensions.permessage_deflate.PerMessageDeflateExtensi
 import org.java_websocket.handshake.ServerHandshake;
 import org.json.JSONException;
 import org.json.JSONObject;
-
+import com.idealbroker.aisee.STTCallback;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
-
 
 public class MicService extends Service {
     private final static int AUDIO_SOURCE = MediaRecorder.AudioSource.VOICE_RECOGNITION;
@@ -48,7 +47,11 @@ public class MicService extends Service {
     private static AudioRecord mAudioRecord;
     private static Executor mExecutor = Executors.newSingleThreadExecutor();
     private static WebSocketClient ws;
+    private static STTCallback callback = new STTCallback() ;
 
+    public static void setCallback(STTCallback callback) {
+        MicService.callback = callback;
+    }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
@@ -119,7 +122,15 @@ public class MicService extends Service {
                 try {
                     JSONObject t = new JSONObject(message);
                     String text = t.getString("text");
-                    PopTip.show(R.mipmap.ai_apeech, text.length() < 10 ? text : text.substring(text.length() - 10)).setAutoTintIconInLightOrDarkMode(false);
+                    int type= t.getInt("type");
+                    switch (type){
+                        case 0:
+                            callback.onProcedure(text);
+                            break;
+                        case 1:
+                            callback.onEnd(text);
+                            break;
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -150,7 +161,7 @@ public class MicService extends Service {
                                 short value = (short) (((buffer[i + 1] & 0xFF) << 8) | (buffer[i] & 0xFF));
                                 t[i / 2] = (short) (value << 3);
                             }
-                            //log.e(TAG, Arrays.toString(t));
+                            Log.e(TAG, Arrays.toString(t));
                             try {
                                 ws.send(Arrays.toString(t));
                             } catch (Exception e) {

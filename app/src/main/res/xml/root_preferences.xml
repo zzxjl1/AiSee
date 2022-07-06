@@ -38,11 +38,11 @@
         app:title="@string/common">
 
         <SwitchPreferenceCompat
-            app:defaultValue="true"
+            app:defaultValue="false"
             app:iconSpaceReserved="false"
-            app:key="capture_compatible_mode"
-            app:summary="@string/capture_compatible_mode_summary"
-            app:title="@string/capture_compatible_mode_title" />
+            app:key="volume_lock"
+            app:summary="@string/volume_lock_summary"
+            app:title="@string/volume_lock_title" />
 
     </PreferenceCategory>
 

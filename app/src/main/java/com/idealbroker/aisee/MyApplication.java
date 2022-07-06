@@ -41,7 +41,7 @@ public class MyApplication extends Application {
         user = new User();
         tts = new TTS();
         tts.speek("欢迎使用AiSee，赛题：A3-视障人士友好的资讯辅助软件",false,false);
-        tts.speek("TTS语音合成测试正常",false,false);
+        tts.speek("准备就绪，请开始使用",false,false);
 
         registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override

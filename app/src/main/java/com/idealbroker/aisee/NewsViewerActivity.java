@@ -108,13 +108,21 @@ public class NewsViewerActivity extends AppCompatActivity {
                 showReplyDialog();
             }
 
+            @JavascriptInterface
+            public void showNewsDetail(int id) {
+                Intent intent = new Intent(NewsViewerActivity.this, NewsViewerActivity.class);
+                intent.putExtra("id", id);
+                startActivity(intent);
+            }
         }, "JS");
         webView.loadUrl("https://aisee.idealbroker.cn/assets/html/newsviewer.html");
         webView.setWebContentsDebuggingEnabled(true);
+        MyApplication.tts.speek("查看新闻详情",true,true);
     }
 
     @Override
     protected void onDestroy() {
+        MyApplication.tts.speek("退出查看", true, true);
         if (webView != null) {
             webView.destroy();
             webView = null;

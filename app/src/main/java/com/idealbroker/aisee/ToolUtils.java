@@ -8,6 +8,7 @@ import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.media.Image;
 import android.os.Handler;
+import android.os.Vibrator;
 import android.util.Base64;
 import android.util.Log;
 import android.webkit.CookieManager;
@@ -178,10 +179,13 @@ public class ToolUtils {
         }
     }
 
+
     public static void showToastMessage(Context acticity, String text, int duration) {
         MyApplication.tts.speek(text, true, true);
         final Toast toast = Toast.makeText(acticity, text, Toast.LENGTH_SHORT);
         toast.show();
+        Vibrator vibrator = (Vibrator)acticity.getSystemService(acticity.VIBRATOR_SERVICE);
+        vibrator.vibrate(500);
         Handler handler = new Handler();
         handler.postDelayed(new Runnable() {
             @Override
